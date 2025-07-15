@@ -1,0 +1,98 @@
+.tile {
+  background: white;
+  border: 2px solid gold;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  padding: 20px;
+  border-radius: 10px;
+  margin: 15px;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+  word-wrap: break-word;
+}
+
+.tile-title {
+  font-size: 1.2rem;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.tile-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #aaa;
+  resize: vertical;
+}
+
+.tile-list {
+  padding-left: 20px;
+  list-style-type: disc;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.tile-expand-btn {
+  background-color: gold;
+  color: black;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.tile-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tile-popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 300px;
+  max-width: 500px;
+  position: relative;
+  text-align: center;
+}
+
+.tile-popup-actions {
+  margin-top: 15px;
+}
+
+.tile-btn {
+  margin: 5px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.tile-btn-approve {
+  background-color: green;
+  color: white;
+}
+
+.tile-btn-reject {
+  background-color: red;
+  color: white;
+}
+
+.tile-btn-close,
+.tile-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+}
