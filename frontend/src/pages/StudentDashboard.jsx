@@ -57,7 +57,7 @@ function StudentDashboard() {
       {loading ? (
         <Loader />
       ) : (
-        <Dashboard headings={clubTiles} renderContent={renderTileContent} />
+        <Dashboard role="student" tiles={clubTiles} renderContent={renderTileContent} />
       )}
     </div>
   );
