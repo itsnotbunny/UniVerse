@@ -10,7 +10,7 @@ const GoogleLoginButton = () => {
     try {
       const { credential } = credentialResponse;
 
-      const response = await axios.post('http://localhost:5000/api/auth/google-login', {
+      const response = await axios.post('http://localhost:5173/api/auth/google-login', {
         credential,
       });
 

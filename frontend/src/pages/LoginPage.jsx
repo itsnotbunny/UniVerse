@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,17 +7,21 @@ function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    /* global google */
+  /* global google */
     google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       callback: handleCredentialResponse,
     });
 
-    google.accounts.id.renderButton(document.getElementById('google-signin'), {
-      theme: 'outline',
-      size: 'large',
-    });
+    google.accounts.id.renderButton(
+      document.getElementById("google-signin"),
+      {
+        theme: "outline",
+        size: "large",
+      }
+    );
   }, []);
+
 
   const handleCredentialResponse = async (response) => {
     try {
