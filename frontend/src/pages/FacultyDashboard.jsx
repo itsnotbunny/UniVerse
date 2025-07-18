@@ -7,6 +7,7 @@ import Modal from '../components/Modal';
 
 function FacultyDashboard() {
   const [events, setEvents] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -15,30 +16,34 @@ function FacultyDashboard() {
   const [suggestMode, setSuggestMode] = useState(false);
   const [suggestion, setSuggestion] = useState('');
 
-
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
+
   const headings = [
     'Pending Requests',
     'Accepted Events',
     'Rejected Events',
     'Edits Suggested',
     'Attendance Lists',
-    'Coordinator List'
+    'Coordinator List',
+    'Coordinator Approval'
   ];
 
   useEffect(() => {
-    fetchEvents();
+    fetchData();
   }, []);
 
-  const fetchEvents = async () => {
+  const fetchData = async () => {
     try {
-      const res = await axios.get(`${API}/api/events/pending`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setEvents(res.data);
+      const headers = { Authorization: `Bearer ${token}` };
+      const [eventRes, userRes] = await Promise.all([
+        axios.get(`${API}/api/events/pending`, { headers }),
+        axios.get(`${API}/api/admin/users`, { headers }),
+      ]);
+      setEvents(eventRes.data);
+      setUsers(userRes.data);
     } catch (err) {
-      console.error("❌ Error fetching events:", err);
+      console.error("❌ Fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -51,85 +56,136 @@ function FacultyDashboard() {
     setComment('');
   };
 
-  const handleAction = async (approved) => {
+  const handleApprove = async () => {
     try {
       await axios.put(
         `${API}/api/events/${selectedEvent._id}/respond`,
-        { approved, comment },
+        { approved: true, comment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setModalOpen(false);
-      fetchEvents();
+      fetchData();
     } catch (err) {
-      console.error("❌ Action failed:", err);
+      console.error("❌ Approve error:", err);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await axios.put(
+        `${API}/api/events/${selectedEvent._id}/respond`,
+        { approved: false, comment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setModalOpen(false);
+      fetchData();
+    } catch (err) {
+      console.error("❌ Reject error:", err);
+    }
+  };
+
+  const handleSuggestEdit = async () => {
+    try {
+      await axios.put(
+        `${API}/api/events/${selectedEvent._id}/suggest-edits`,
+        { comment: suggestion },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Suggestion submitted.");
+      setModalOpen(false);
+      setSuggestMode(false);
+      setSuggestion('');
+      fetchData();
+    } catch (err) {
+      console.error("❌ Suggest edits error:", err);
+      alert("Failed to submit suggestion");
+    }
+  };
+
+  const approveCoordinator = async (userId) => {
+    try {
+      await axios.put(`${API}/api/admin/assign-role/${userId}`, {
+        role: 'studentCoordinator'
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      fetchData();
+    } catch (err) {
+      console.error("❌ Coordinator approval error:", err);
+    }
+  };
+
+  const rejectCoordinator = async (userId) => {
+    try {
+      await axios.delete(`${API}/api/admin/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchData();
+    } catch (err) {
+      console.error("❌ Coordinator rejection error:", err);
     }
   };
 
   const renderTileContent = (heading) => {
+    if (heading === 'Coordinator Approval') {
+      const pending = users.filter(u => u.role === 'pending' && u.desiredRole === 'studentCoordinator');
+      return pending.length ? pending.map((u, i) => (
+        <div key={i}>
+          <strong>{u.name}</strong> — {u.email}
+          <br />
+          <button onClick={() => approveCoordinator(u._id)}>Approve</button>
+          <button onClick={() => rejectCoordinator(u._id)} style={{ marginLeft: '10px' }}>Reject</button>
+        </div>
+      )) : <p>No pending coordinator requests.</p>;
+    }
+
+    if (heading === 'Coordinator List') {
+      const coordinators = users.filter(u => u.role === 'studentCoordinator');
+      return coordinators.length ? (
+        <ul>
+          {coordinators.map((c, i) => (
+            <li key={i}>
+              {c.name} {c.club ? `– ${c.club}` : ''}
+            </li>
+          ))}
+        </ul>
+      ) : <p>No coordinators available yet.</p>;
+    }
+
     const filtered = events.filter(e => {
-      const facultyEntry = e.facultyApprovals.find(a => a.faculty === e._id || a.faculty?._id === e._id);
-      if (!facultyEntry) return false;
+      const entry = e.facultyApprovals.find(f => f.faculty === e._id || f.faculty?._id === e._id);
+      if (!entry) return false;
 
       switch (heading) {
-        case 'Pending Requests': return facultyEntry.approved === null;
-        case 'Accepted Events': return facultyEntry.approved === true;
-        case 'Rejected Events': return facultyEntry.approved === false;
-        case 'Edits Suggested': return facultyEntry.comment && !facultyEntry.approved;
+        case 'Pending Requests': return entry.approved === null;
+        case 'Accepted Events': return entry.approved === true;
+        case 'Rejected Events': return entry.approved === false;
+        case 'Edits Suggested': return entry.comment && entry.approved === null;
         default: return false;
       }
     });
 
-    const handleSuggestEdit = async () => {
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        await axios.put(
-          `${API}/api/events/${selectedEvent._id}/suggest-edits`,
-          { comment: suggestion },
-          { headers }
-        );
-        alert("Suggestion submitted.");
-        setModalOpen(false);
-        setSuggestMode(false);
-        setSuggestion('');
-        fetchEvents(); // refresh list
-      } catch (err) {
-        console.error("❌ Suggest edits error:", err);
-        alert("Failed to submit suggestion");
-      }
-    };
-
     if (['Pending Requests', 'Accepted Events', 'Rejected Events', 'Edits Suggested'].includes(heading)) {
-      if (filtered.length === 0) return <p>No {heading.toLowerCase()}.</p>;
-      return filtered.map((event, i) => (
+      return filtered.length ? filtered.map((event, i) => (
         <div
-          key={event._id || i}
+          key={i}
           className="request-item"
           onClick={() => openModal(event, heading)}
           style={{ cursor: 'pointer', marginBottom: '10px' }}
         >
           <strong>{event.title}</strong> — {event.clubName}
         </div>
-      ));
+      )) : <p>No {heading.toLowerCase()}.</p>;
     }
 
     if (heading === 'Attendance Lists') {
       return (
         <ul>
-          <li><a href="https://sheets.google.com/dance" target="_blank">Dance Event Attendance</a></li>
-          <li><a href="https://sheets.google.com/music" target="_blank">Music Workshop Attendance</a></li>
+          <li><a href="https://sheets.google.com/dance" target="_blank" rel="noopener noreferrer">Dance Attendance</a></li>
+          <li><a href="https://sheets.google.com/music" target="_blank" rel="noopener noreferrer">Music Attendance</a></li>
         </ul>
       );
     }
 
-    if (heading === 'Coordinator List') {
-      return (
-        <ul>
-          <li>Alice - Music Club</li>
-          <li>Bob - Tech Club</li>
-        </ul>
-      );
-    }
-
+    // Fallback for unknown tiles
     return <p>Coming soon...</p>;
   };
 
@@ -137,7 +193,6 @@ function FacultyDashboard() {
     <div>
       <LogoutButton />
       {loading ? <Loader /> : <Dashboard headings={headings} renderContent={renderTileContent} />}
-
       <Modal isOpen={modalOpen} onClose={() => {
         setModalOpen(false);
         setSuggestMode(false);
@@ -148,7 +203,6 @@ function FacultyDashboard() {
             <h2>{selectedEvent.title}</h2>
             <p>{selectedEvent.description}</p>
             <hr />
-
             {suggestMode ? (
               <div>
                 <textarea
@@ -162,15 +216,13 @@ function FacultyDashboard() {
               </div>
             ) : (
               <div className="popup-buttons">
-                {activeTile === 'Pending Requests' && (
+                {activeTile === 'Pending Requests' ? (
                   <>
                     <button onClick={handleApprove}>Approve</button>
                     <button onClick={handleReject}>Reject</button>
                     <button onClick={() => setSuggestMode(true)}>Suggest Edits</button>
                   </>
-                )}
-
-                {activeTile !== 'Pending Requests' && (
+                ) : (
                   <>
                     <button onClick={() => setModalOpen(false)}>Close</button>
                     <button onClick={() => setSuggestMode(true)}>Suggest Edits</button>

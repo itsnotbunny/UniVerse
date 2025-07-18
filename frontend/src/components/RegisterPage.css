@@ -1,0 +1,23 @@
+.register-page {
+  max-width: 400px;
+  margin: auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+select {
+  margin: 1rem 0;
+  padding: 0.5rem;
+}
+
+.google-button {
+  margin: 1rem 0;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+}

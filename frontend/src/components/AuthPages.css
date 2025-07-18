@@ -1,0 +1,44 @@
+.auth-page {
+  background-color: #3c003c; /* wine background */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #ffd700; /* gold text */
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.auth-form {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+.auth-form button,
+.auth-form select {
+  display: block;
+  margin: 1rem auto;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid gold;
+  border-radius: 8px;
+  background-color: #000;
+  color: gold;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.auth-form button:hover,
+.auth-form select:hover {
+  background-color: gold;
+  color: #000;
+}
+
+.auth-form select {
+  width: 80%;
+  font-size: 1rem;
+  background-color: #222;
+}

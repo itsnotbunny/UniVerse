@@ -1,81 +1,44 @@
-import { useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
-import axios from 'axios';
+import './AuthPages.css';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 
 function LoginPage() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-  /* global google */
-    google.accounts.id.initialize({
-      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse,
-    });
+  const handleGoogleLoginSuccess = (credentialResponse) => {
+    const credential = credentialResponse.credential;
 
-    google.accounts.id.renderButton(
-      document.getElementById("google-signin"),
-      {
-        theme: "outline",
-        size: "large",
-      }
-    );
-  }, []);
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/google-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
 
-
-  const handleCredentialResponse = async (response) => {
-    try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/google-login`, {
-        credential: response.credential,
+        const role = data.user.role;
+        if (role === 'admin') navigate('/admin');
+        else if (role === 'faculty') navigate('/faculty');
+        else if (role === 'studentCoordinator') navigate('/coordinator');
+        else if (role === 'student') navigate('/student');
+        else navigate('/');
+      })
+      .catch((err) => {
+        console.error("Google login failed:", err);
       });
-
-      const { token, user } = data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      switch (user.role) {
-        case 'admin':
-          navigate('/admin');
-          break;
-        case 'faculty':
-          navigate('/faculty');
-          break;
-        case 'studentCoordinator':
-          navigate('/coordinator');
-          break;
-        case 'student':
-        default:
-          navigate('/student');
-          break;
-      }
-    } catch (err) {
-      console.error('Login failed', err);
-      alert("Google login failed");
-    }
   };
 
   return (
-  <div
-    style={{
-      display: 'flex',
-      height: '100vh',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#722f37', // wine background
-    }}
-  >
-    <div
-      id="google-signin"
-      style={{
-        padding: '2rem',
-        backgroundColor: 'white',
-        border: '2px solid gold',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
-      }}
-    >
+    <div className="auth-page">
+      <h2>Welcome to UniVerse</h2>
+      <div className="auth-form">
+        <GoogleLogin onSuccess={handleGoogleLoginSuccess} onError={() => alert("Google login failed")} />
+        <button onClick={() => navigate('/register')}>Register</button>
+        <button onClick={() => navigate('/student')}>Continue as Student</button>
+      </div>
     </div>
-  </div>
   );
 }
 

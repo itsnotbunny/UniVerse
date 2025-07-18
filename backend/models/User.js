@@ -7,9 +7,15 @@ const userSchema = new mongoose.Schema({
   // Role-based access
   role: {
     type: String,
-    enum: ['admin', 'faculty', 'studentCoordinator', 'student'],
-    default: 'student'
+    enum: ['admin', 'faculty', 'studentCoordinator', 'student', 'pending'],
+    default: 'pending'
   },
+  desiredRole: {
+    type: String,
+    enum: ['faculty', 'studentCoordinator', null],
+    default: null
+  },
+
 
   // Only for faculty
   facultyRole: {
