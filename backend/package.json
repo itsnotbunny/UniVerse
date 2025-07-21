@@ -4,8 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "vercel-build": "echo 'No build step needed for backend'"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
