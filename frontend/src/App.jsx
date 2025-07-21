@@ -5,11 +5,14 @@ import FacultyDashboard from './pages/FacultyDashboard';
 import CoordinatorDashboard from './pages/CoordinatorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import ProtectedRoute from './routes/ProtectedRoute';
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
+
+      <Route path='/register' element={<RegisterPage />} />
 
       <Route
         path="/admin"

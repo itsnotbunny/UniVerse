@@ -21,13 +21,15 @@ function StudentDashboard() {
   const fetchPublicEvents = async () => {
     try {
       const res = await axios.get(`${API}/api/events/public`);
-      setEvents(res.data);
+      setEvents(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch public events:", err);
+      setEvents([]); // Fallback to empty
     } finally {
       setLoading(false);
     }
   };
+
 
   const renderTileContent = (club) => {
     const filtered = events.filter(
