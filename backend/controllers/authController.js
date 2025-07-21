@@ -1,16 +1,35 @@
-// backend/controllers/authController.js
+const User = require('../models/User');
+const jwt = require('../utils/jwt');
 
-const googleLogin = (req, res) => {
-  return res.status(200).json({ message: 'Google login endpoint hit (mock)' });
-};
+const registerUser = async (req, res) => {
+  try {
+    const { name, email, role, club } = req.body;
 
-const registerUser = (req, res) => {
-  return res.status(200).json({ message: 'Register endpoint hit (mock)' });
-};
+    if (!name || !email || !role) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
-const getCurrentUser = (req, res) => {
-  // This would normally extract the user from req.user
-  return res.status(200).json({ message: 'Current user endpoint hit (mock)' });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
+    }
+
+    const user = new User({
+      name,
+      email,
+      role,
+      club,
+      isApproved: role === 'studentCoordinator' ? null : true // pending only if student coordinator
+    });
+
+    await user.save();
+
+    const token = jwt.signToken(user); // Assuming you have a signToken util
+    res.status(201).json({ token, user }); // ✅ send valid JSON back
+  } catch (err) {
+    console.error("❌ Error in registerUser:", err);
+    res.status(500).json({ message: "Server error during registration" });
+  }
 };
 
 module.exports = {
