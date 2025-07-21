@@ -1,17 +1,16 @@
-// Add this in middleware/auth.js below the existing middleware exports
+const express = require('express');
+const router = express.Router();
 
-const checkPending = (req, res, next) => {
-  if (req.user.role === 'pending') {
-    return res.status(403).send('Your registration is still pending approval.');
-  }
-  next();
-};
+const {
+  googleLogin,
+  registerUser,
+  getCurrentUser,
+} = require('../controllers/authController');
 
-module.exports = {
-  authMiddleware,
-  isAdmin,
-  isFaculty,
-  isCoordinator,
-  isStudent,
-  checkPending,
-};
+const { authMiddleware } = require('../middleware/auth'); // ✅ Proper import
+
+router.post('/google-login', googleLogin);
+router.post('/register', registerUser);
+router.get('/me', authMiddleware, getCurrentUser);
+
+module.exports = router;
