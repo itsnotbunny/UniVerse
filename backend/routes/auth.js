@@ -7,7 +7,9 @@ const {
   getCurrentUser,
 } = require('../controllers/authController');
 
-const { authMiddleware } = require('../middleware/auth'); // ✅ Proper import
+const { authMiddleware } = require('../middleware/auth'); // ✅ Proper importconst { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role'); // ✅ Correct file
+
 
 router.post('/google-login', googleLogin);
 router.post('/register', registerUser);
