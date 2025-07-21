@@ -37,11 +37,7 @@ function App() {
       />
       <Route
         path="/student"
-        element={
-          <ProtectedRoute role="student">
-            <StudentDashboard />
-          </ProtectedRoute>
-        }
+      element = {<StudentDashboard />}
       />
     </Routes>
   );
