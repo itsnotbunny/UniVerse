@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Idea = require('../models/Idea');
-const { authMiddleware, requireRole } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');          // ✅ Correct source
+const { requireRole } = require('../middleware/role');             // ✅ Correct source
 
 // Submit idea
 router.post('/', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {

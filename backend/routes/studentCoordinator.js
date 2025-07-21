@@ -1,6 +1,9 @@
+// backend/routes/studentCoordinator.js
+
 const express = require('express');
 const User = require('../models/User');
-const { authMiddleware, requireRole } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');       // ✅ from auth.js
+const { requireRole } = require('../middleware/role');          // ✅ from role.js
 
 const router = express.Router();
 
