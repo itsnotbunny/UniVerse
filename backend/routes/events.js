@@ -6,6 +6,7 @@ const User = require('../models/User');
 const { authMiddleware } = require('../middleware/auth');
 const { requireRole } = require('../middleware/role');
 
+
 // Student Coordinator: Submit event request
 router.post('/', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
   const { title, description, clubName, eventDate, facultyIds, isPublic, registrationLinks } = req.body;
