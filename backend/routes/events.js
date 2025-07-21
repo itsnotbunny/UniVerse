@@ -2,7 +2,8 @@ const express = require('express');
 const sendMail = require('../utils/mailer');
 const EventRequest = require('../models/EventRequest');
 const User = require('../models/User');
-const { authMiddleware, requireRole } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role'); // ✅ Correct file
 
 const router = express.Router();
 
