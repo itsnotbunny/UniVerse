@@ -1,13 +1,11 @@
 const express = require('express');
+const router = express.Router();
 const sendMail = require('../utils/mailer');
 const EventRequest = require('../models/EventRequest');
 const User = require('../models/User');
 const { authMiddleware } = require('../middleware/auth');
-const { requireRole } = require('../middleware/role'); // ✅ Correct file
+const { requireRole } = require('../middleware/role');
 
-const router = express.Router();
-
-// Student: Submit event request
 // Student Coordinator: Submit event request
 router.post('/', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
   const { title, description, clubName, eventDate, facultyIds, isPublic, registrationLinks } = req.body;
@@ -45,20 +43,21 @@ router.get('/my-events', authMiddleware, requireRole('studentCoordinator'), asyn
   res.json(events);
 });
 
+// Student Coordinator: Update event organisation flow
 router.put('/:eventId/organisation', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
-  const { eventId } = req.params;
   const { organisingFlow } = req.body;
+  const { eventId } = req.params;
 
   const event = await EventRequest.findById(eventId);
-  if (!event || event.coordinator.toString() !== req.user._id.toString()) {
-    return res.status(403).send("Not allowed to edit this event");
+  if (!event) return res.status(404).send("Event not found");
+  if (event.coordinator.toString() !== req.user._id.toString()) {
+    return res.status(403).send("Not authorized to edit this event");
   }
 
   event.organisingFlow = organisingFlow;
   await event.save();
-  res.send("Organisation flow updated");
+  res.send("Organising flow updated");
 });
-
 
 // Faculty: View events assigned to them
 router.get('/pending', authMiddleware, requireRole('faculty'), async (req, res) => {
@@ -69,18 +68,7 @@ router.get('/pending', authMiddleware, requireRole('faculty'), async (req, res) 
   res.json(events);
 });
 
-// 🆓 Public: View all events with public registration links
-router.get('/public', async (req, res) => {
-  const events = await EventRequest.find({ isPublic: true })
-    .select('title description clubName eventDate registrationLinks')
-    .sort({ eventDate: 1 });
-
-  res.json(events);
-});
-
-
-// Faculty: Approve/Reject event
-// Faculty: Suggest edits (instead of approve/reject)
+// Faculty: Suggest edits
 router.put('/:eventId/suggest-edits', authMiddleware, requireRole('faculty'), async (req, res) => {
   const { eventId } = req.params;
   const { comment } = req.body;
@@ -101,7 +89,6 @@ router.put('/:eventId/suggest-edits', authMiddleware, requireRole('faculty'), as
 
   await event.save();
 
-  // Notify the student coordinator
   const student = await User.findById(event.coordinator);
   const mailText = `Hello ${student.name},
 
@@ -121,8 +108,7 @@ College Event Manager`;
   res.send("Edit suggestion submitted");
 });
 
-
-// Student Coordinator: Make event public and add registration links
+// Student Coordinator: Make event public
 router.put('/:eventId/make-public', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
   const { eventId } = req.params;
   const { registrationLinks } = req.body;
@@ -141,35 +127,13 @@ router.put('/:eventId/make-public', authMiddleware, requireRole('studentCoordina
   res.json({ message: "Event marked as public with registration links", event });
 });
 
-// Public: Get all public events with registration links
+// Public: Get all public events
 router.get('/public', async (req, res) => {
   const events = await EventRequest.find({ isPublic: true })
     .select('title clubName eventDate registrationLinks')
     .sort({ eventDate: 1 });
 
   res.json(events);
-});
-
-// Student Coordinator: Fetch own events
-router.get('/my-events', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
-  const events = await EventRequest.find({ coordinator: req.user._id });
-  res.json(events);
-});
-
-// Student Coordinator: Update event organisation flow
-router.put('/:eventId/organisation', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
-  const { organisingFlow } = req.body;
-  const { eventId } = req.params;
-
-  const event = await EventRequest.findById(eventId);
-  if (!event) return res.status(404).send("Event not found");
-  if (event.coordinator.toString() !== req.user._id.toString()) {
-    return res.status(403).send("Not authorized to edit this event");
-  }
-
-  event.organisingFlow = organisingFlow;
-  await event.save();
-  res.send("Organising flow updated");
 });
 
 module.exports = router;
