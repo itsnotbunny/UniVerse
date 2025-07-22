@@ -1,0 +1,21 @@
+/* components/LayoutWrapper.css */
+.layout-wrapper {
+  min-height: 100vh;
+  background-color: #4b0f2e; /* wine */
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.dashboard-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: gold;
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}

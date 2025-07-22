@@ -1,5 +1,7 @@
+// pages/AdminDashboard.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import LayoutWrapper from '../components/LayoutWrapper';
 import LogoutButton from '../components/LogoutButton';
 import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
@@ -36,7 +38,7 @@ function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
       await axios.put(`${API}/api/admin/assign-role/${userId}`, {
         role: 'faculty',
-        subRole: 'Professor' // or dynamically chosen
+        subRole: 'Professor' // Optional: make dynamic if needed
       }, { headers });
       fetchData();
     } catch (err) {
@@ -92,29 +94,28 @@ function AdminDashboard() {
     )) : <p>No public events available for this club.</p>;
   };
 
+  const headings = [
+    'User Database',
+    'Pending Faculty Registrations',
+    'Dance',
+    'Music',
+    'Photography',
+    'Art',
+    'Technical',
+    'Literary',
+    'Fashion',
+    'Book',
+  ];
+
   return (
-    <div>
+    <LayoutWrapper title="Admin Dashboard">
       <LogoutButton />
       {loading ? (
         <Loader />
       ) : (
-        <Dashboard
-          headings={[
-            'User Database',
-            'Pending Faculty Registrations',
-            'Dance',
-            'Music',
-            'Photography',
-            'Art',
-            'Technical',
-            'Literary',
-            'Fashion',
-            'Book',
-          ]}
-          renderContent={renderTileContent}
-        />
+        <Dashboard headings={headings} renderContent={renderTileContent} />
       )}
-    </div>
+    </LayoutWrapper>
   );
 }
 

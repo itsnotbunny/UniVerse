@@ -1,9 +1,11 @@
+// src/pages/FacultyDashboard.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import LogoutButton from '../components/LogoutButton';
 import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
+import LayoutWrapper from '../components/LayoutWrapper';
 
 function FacultyDashboard() {
   const [events, setEvents] = useState([]);
@@ -185,12 +187,11 @@ function FacultyDashboard() {
       );
     }
 
-    // Fallback for unknown tiles
     return <p>Coming soon...</p>;
   };
 
   return (
-    <div>
+    <LayoutWrapper title="Faculty Dashboard">
       <LogoutButton />
       {loading ? <Loader /> : <Dashboard headings={headings} renderContent={renderTileContent} />}
       <Modal isOpen={modalOpen} onClose={() => {
@@ -233,7 +234,7 @@ function FacultyDashboard() {
           </div>
         )}
       </Modal>
-    </div>
+    </LayoutWrapper>
   );
 }
 

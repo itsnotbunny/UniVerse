@@ -1,40 +1,41 @@
 /* Dashboard.css */
-
 body, html, #root {
   margin: 0;
   padding: 0;
   height: 100%;
-  background-color: #2b0a30; /* Wine background */
+  background-color: #1a1a1a;
   font-family: 'Segoe UI', sans-serif;
+  color: #fff;
 }
 
 .dashboard-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
   padding: 2rem;
-  background-color: #2b0a30;
+  background: linear-gradient(to bottom right, #3e003e, #1a1a1a);
+  min-height: 100vh;
+}
+
+.dashboard-title {
+  text-align: center;
+  font-size: 2rem;
+  color: gold;
+  margin-bottom: 2rem;
 }
 
 .tile-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.2rem;
-  max-width: 1200px;
-  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
 .tile {
-  background-color: #000;
-  color: #fff;
+  background-color: #111;
   border: 2px solid gold;
-  padding: 1.2rem;
   border-radius: 8px;
-  box-shadow: 0 0 10px gold;
-  transition: transform 0.3s;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  transition: transform 0.2s;
 }
 
 .tile:hover {
-  transform: translateY(-4px);
+  transform: scale(1.02);
 }

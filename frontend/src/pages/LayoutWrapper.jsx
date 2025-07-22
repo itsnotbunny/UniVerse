@@ -1,10 +1,13 @@
 // components/LayoutWrapper.jsx
-import './Dashboard.css';
+import './LayoutWrapper.css';
 
-function LayoutWrapper({ children }) {
+function LayoutWrapper({ title, children }) {
   return (
-    <div className="dashboard-wrapper">
-      <div className="tile-grid">{children}</div>
+    <div className="layout-wrapper">
+      <h1 className="dashboard-title">{title}</h1>
+      <div className="dashboard-content">
+        {children}
+      </div>
     </div>
   );
 }

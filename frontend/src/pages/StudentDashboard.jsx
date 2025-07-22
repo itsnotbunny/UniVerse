@@ -1,6 +1,8 @@
+// src/pages/StudentDashboard.jsx
 import { useEffect, useState } from 'react';
 import LogoutButton from '../components/LogoutButton';
 import Dashboard from '../components/Dashboard';
+import LayoutWrapper from '../components/LayoutWrapper';
 import Loader from '../components/Loader';
 import axios from 'axios';
 
@@ -30,7 +32,6 @@ function StudentDashboard() {
     }
   };
 
-
   const renderTileContent = (club) => {
     const filtered = events.filter(
       (e) => e.clubName?.toLowerCase() === club.toLowerCase()
@@ -43,7 +44,9 @@ function StudentDashboard() {
           <p>{ev.description}</p>
           <ul>
             {ev.registrationLinks.map((link, j) => (
-              <li key={j}><a href={link} target="_blank">{link}</a></li>
+              <li key={j}>
+                <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+              </li>
             ))}
           </ul>
         </div>
@@ -54,14 +57,14 @@ function StudentDashboard() {
   };
 
   return (
-    <div>
+    <LayoutWrapper title="Student Dashboard">
       <LogoutButton />
       {loading ? (
         <Loader />
       ) : (
-        <Dashboard role="student" tiles={clubTiles} renderContent={renderTileContent} />
+        <Dashboard headings={clubTiles} renderContent={renderTileContent} />
       )}
-    </div>
+    </LayoutWrapper>
   );
 }
 
