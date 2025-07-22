@@ -48,7 +48,10 @@ const registerUser = async (req, res) => {
 const googleLogin = async (req, res) => {
   try {
     const { credential } = req.body;
-    if (!credential) return res.status(400).json({ message: "Missing credential" });
+    if (!credential) {
+      console.log("🚫 Missing credential in request body");
+      return res.status(400).json({ message: "Missing credential" });
+    }
 
     const ticket = await client.verifyIdToken({
       idToken: credential,
@@ -56,21 +59,29 @@ const googleLogin = async (req, res) => {
     });
 
     const payload = ticket.getPayload();
+    console.log("✅ Google token payload:", payload);
+
     const { email } = payload;
+    if (!email) {
+      console.log("🚫 No email found in payload");
+      return res.status(400).json({ message: "Email not found in token" });
+    }
 
     const user = await User.findOne({ email });
-
     if (!user) {
+      console.log("❌ No user found with email:", email);
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Ensure role and isApproved exist
     if (!user.role || !user.isApproved) {
+      console.log("🚫 User not approved or missing role:", user);
       return res.status(403).json({ message: "User not approved or missing role" });
     }
 
     const token = jwt.signToken(user);
+    console.log("✅ Login successful, returning token");
     res.status(200).json({ token, user });
+
   } catch (err) {
     console.error("❌ googleLogin error:", err);
     res.status(500).json({ message: "Login failed" });
