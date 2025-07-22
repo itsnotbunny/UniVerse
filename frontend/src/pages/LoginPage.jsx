@@ -33,7 +33,7 @@ function LoginPage() {
   };
 
   return (
-    <LayoutWrapper title="Welcome to UniVerse">
+    <LayoutWrapper title="Welcome to UniVerse" center>
       <div className="auth-page">
         <div className="auth-form">
           <h2>Choose Login Method</h2>

@@ -1,11 +1,11 @@
 // src/components/LayoutWrapper.jsx
 import './LayoutWrapper.css';
 
-const LayoutWrapper = ({ children, title }) => {
+const LayoutWrapper = ({ children, title, center }) => {
   return (
     <div className="layout-wrapper">
-      <div className="dashboard-grid">
-        {title && <h1 className="dashboard-title">{title}</h1>}
+      {title && <h1 className="layout-title">{title}</h1>}
+      <div className={center ? "layout-center" : "dashboard-grid"}>
         {children}
       </div>
     </div>

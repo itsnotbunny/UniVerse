@@ -37,7 +37,7 @@ function RegisterPage() {
   };
 
   return (
-    <LayoutWrapper title="Register">
+    <LayoutWrapper title="Register" center>
       <div className="register-wrapper">
 
         <div className="auth-page register-page">

@@ -28,6 +28,7 @@
   justify-content: center;
   width: 100%;
   align-items: center;
+  min-height: calc(100vh - 80px);
 }
 
 .layout-title {
@@ -35,4 +36,11 @@
   font-size: 2rem;
   margin-bottom: 2rem;
   text-align: center;
+}
+
+.layout-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
