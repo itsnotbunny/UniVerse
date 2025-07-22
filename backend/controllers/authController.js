@@ -3,7 +3,6 @@ const jwt = require('../utils/jwt');
 
 // Register User
 const { OAuth2Client } = require('google-auth-library');
-const jwt = require('../utils/jwt');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
