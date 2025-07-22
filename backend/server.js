@@ -10,6 +10,9 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`)); // ✅ Render will now detect it
 
+const facultyRoutes = require('./routes/faculty');
+app.use('/api/faculty', facultyRoutes);
+
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ MongoDB connected'))

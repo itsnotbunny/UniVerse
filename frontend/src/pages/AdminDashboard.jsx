@@ -13,7 +13,8 @@ function AdminDashboard() {
   const headings = [
     'Dance', 'Music', 'Photography', 'Art',
     'Technical', 'Literary', 'Fashion', 'Book',
-    'Student Coordinators', 'User Database'
+    'Student Coordinators', 'User Database',
+    'Faculty Registration'
   ];
 
   useEffect(() => {
@@ -31,6 +32,22 @@ function AdminDashboard() {
     }
   };
 
+  const [pendingFaculty, setPendingFaculty] = useState([]);
+
+  useEffect(() => {
+    fetchCoordinators();
+    fetchPendingFaculty(); // ✅ fetch pending faculty
+  }, []);
+
+  const fetchPendingFaculty = async () => {
+    try {
+      const res = await axios.get('${API}/api/users/faculty-pending');
+      setPendingFaculty(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch pending faculty:", err);
+    }
+  };
+
   const renderTileContent = (heading) => {
     if (heading === 'Student Coordinators') {
       return (
@@ -44,7 +61,17 @@ function AdminDashboard() {
     if (heading === 'User Database') {
       return <p>Full user list to be implemented</p>;
     }
-
+    if (heading === 'Faculty Registration') {
+      return pendingFaculty.length > 0 ? (
+        <ul>
+          {pendingFaculty.map((f, i) => (
+            <li key={i}>{f.name} — {f.email}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>No pending faculty approvals</p>
+      );
+    }
     return <p>Club events or tools for {heading}</p>;
   };
 
