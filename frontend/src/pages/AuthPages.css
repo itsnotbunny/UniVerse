@@ -1,29 +1,36 @@
-/* App.css or AuthPages.css */
-.app-container {
+/* AuthPages.css */
+
+/* Outer container that fills the screen and centers the tile */
+.fullscreen-center {
   min-height: 100vh;
   width: 100%;
-  background-color: #330033; /* Wine background */
+  background-color: #4b0010; /* Wine background */
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 2rem;
+  box-sizing: border-box;
 }
 
+/* The actual tile box for login/register */
 .auth-page, .register-page {
-  background: #1a1a1a;
-  color: white;
+  background-color: #111;
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
-  max-width: 450px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+  max-width: 400px;
   width: 100%;
-}
-
-.auth-page h2, .register-page h2 {
+  color: white;
   text-align: center;
-  color: gold;
 }
 
+/* Titles */
+.auth-page h2, .register-page h2 {
+  color: gold;
+  margin-bottom: 1rem;
+}
+
+/* Google + buttons layout */
 .auth-form, .google-button {
   display: flex;
   flex-direction: column;
@@ -31,6 +38,7 @@
   margin-top: 1.5rem;
 }
 
+/* Buttons */
 button {
   background-color: gold;
   color: black;
@@ -46,6 +54,7 @@ button:hover {
   background-color: #ffcc00;
 }
 
+/* Role dropdown */
 select {
   margin-top: 1rem;
   padding: 0.5rem;
@@ -55,6 +64,7 @@ select {
   border: 1px solid #555;
 }
 
+/* Messages */
 .error {
   color: red;
   text-align: center;

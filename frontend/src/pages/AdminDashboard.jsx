@@ -1,4 +1,3 @@
-// pages/AdminDashboard.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import LayoutWrapper from '../components/LayoutWrapper';
@@ -38,7 +37,7 @@ function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
       await axios.put(`${API}/api/admin/assign-role/${userId}`, {
         role: 'faculty',
-        subRole: 'Professor' // Optional: make dynamic if needed
+        subRole: 'Professor'
       }, { headers });
       fetchData();
     } catch (err) {
@@ -113,7 +112,7 @@ function AdminDashboard() {
       {loading ? (
         <Loader />
       ) : (
-        <Dashboard headings={headings} renderContent={renderTileContent} />
+        <Dashboard role="admin" tiles={headings} renderContent={renderTileContent} />
       )}
     </LayoutWrapper>
   );

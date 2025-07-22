@@ -1,7 +1,7 @@
-// src/pages/RegisterPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import LayoutWrapper from '../components/LayoutWrapper';
 import './RegisterPage.css';
 
 function RegisterPage() {
@@ -37,33 +37,37 @@ function RegisterPage() {
   };
 
   return (
-    <div className="app-container">
-      <div className="register-page">
-        <h2>Register with Google</h2>
+    <LayoutWrapper title="Register">
+      <div className="register-wrapper">
 
-        <label>Select your role:</label>
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="">-- Select Role --</option>
-          <option value="faculty">Faculty</option>
-          <option value="studentCoordinator">Student Coordinator</option>
-        </select>
+        <div className="auth-page register-page">
+          <h2>Register with Google</h2>
 
-        {role && (
-          <div className="google-button">
-            <GoogleLogin
-              onSuccess={handleGoogleRegister}
-              onError={() => setError("Google sign-in failed")}
-            />
-          </div>
-        )}
+          <label>Select your role:</label>
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="">-- Select Role --</option>
+            <option value="faculty">Faculty</option>
+            <option value="studentCoordinator">Student Coordinator</option>
+          </select>
 
-        {error && <p className="error">{error}</p>}
-        {message && <p className="success">{message}</p>}
+          {role && (
+            <div className="google-button">
+              <GoogleLogin
+                onSuccess={handleGoogleRegister}
+                onError={() => setError("Google sign-in failed")}
+                />
+            </div>
+          )}
 
-        <button onClick={() => navigate('/')}>Back to Login</button>
+          {error && <p className="error">{error}</p>}
+          {message && <p className="success">{message}</p>}
+
+          <button onClick={() => navigate('/')}>Back to Login</button>
+        </div>
       </div>
-    </div>
+    </LayoutWrapper>
   );
+
 }
 
 export default RegisterPage;

@@ -1,8 +1,8 @@
-// src/pages/StudentDashboard.jsx
+// StudentDashboard.jsx
 import { useEffect, useState } from 'react';
 import LogoutButton from '../components/LogoutButton';
-import Dashboard from '../components/Dashboard';
 import LayoutWrapper from '../components/LayoutWrapper';
+import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
 import axios from 'axios';
 
@@ -11,7 +11,7 @@ function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const API = import.meta.env.VITE_API_BASE_URL;
 
-  const clubTiles = [
+  const headings = [
     'Dance', 'Music', 'Photography', 'Art',
     'Technical', 'Literary', 'Fashion', 'Book'
   ];
@@ -26,7 +26,7 @@ function StudentDashboard() {
       setEvents(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch public events:", err);
-      setEvents([]); // Fallback to empty
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -44,9 +44,7 @@ function StudentDashboard() {
           <p>{ev.description}</p>
           <ul>
             {ev.registrationLinks.map((link, j) => (
-              <li key={j}>
-                <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-              </li>
+              <li key={j}><a href={link} target="_blank">{link}</a></li>
             ))}
           </ul>
         </div>
@@ -60,9 +58,11 @@ function StudentDashboard() {
     <LayoutWrapper title="Student Dashboard">
       <LogoutButton />
       {loading ? (
-        <Loader />
+        <div className="loader-wrapper">
+          <Loader />
+        </div>
       ) : (
-        <Dashboard headings={clubTiles} renderContent={renderTileContent} />
+        <Dashboard headings={headings} renderContent={renderTileContent} />
       )}
     </LayoutWrapper>
   );

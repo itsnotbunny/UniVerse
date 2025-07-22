@@ -1,11 +1,24 @@
 /* App.css */
-
 body, html, #root {
   margin: 0;
   padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #4b0010;
+  color: white;
   height: 100%;
-  background-color: #1a1a1a; /* fallback dark */
-  font-family: 'Segoe UI', sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: gold;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 .app-container {
@@ -27,6 +40,7 @@ body, html, #root {
   width: 100%;
   color: white;
   text-align: center;
+  margin: 0 auto; /* ✅ THIS is the fix */
 }
 
 h2 {

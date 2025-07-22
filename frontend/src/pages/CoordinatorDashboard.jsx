@@ -4,6 +4,7 @@ import LogoutButton from '../components/LogoutButton';
 import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
+import LayoutWrapper from '../components/LayoutWrapper';
 
 function CoordinatorDashboard() {
   const [events, setEvents] = useState([]);
@@ -15,6 +16,15 @@ function CoordinatorDashboard() {
 
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
+
+  const headings = [
+    'Events Sent',
+    'Idea Board',
+    'Events Status',
+    'Faculty Status',
+    'Faculty List',
+    'Event Organisation'
+  ];
 
   useEffect(() => {
     fetchData();
@@ -43,15 +53,6 @@ function CoordinatorDashboard() {
     setModalOpen(true);
   };
 
-  const headings = [
-    'Events Sent',
-    'Idea Board',
-    'Events Status',
-    'Faculty Status',
-    'Faculty List',
-    'Event Organisation'
-  ];
-
   const renderTileContent = (heading) => {
     switch (heading) {
       case 'Events Sent':
@@ -63,14 +64,14 @@ function CoordinatorDashboard() {
 
       case 'Events Status':
         return events.map((e, i) => {
-          const approvedCount = e.facultyApprovals.filter(a => a.approved === true).length;
-          const rejectedCount = e.facultyApprovals.filter(a => a.approved === false).length;
-          const pendingCount = e.facultyApprovals.filter(a => a.approved === null).length;
+          const approved = e.facultyApprovals.filter(a => a.approved === true).length;
+          const rejected = e.facultyApprovals.filter(a => a.approved === false).length;
+          const pending = e.facultyApprovals.filter(a => a.approved === null).length;
 
           return (
             <div key={e._id || i} onClick={() => openModal(e, heading)} className="request-item" style={{ cursor: 'pointer' }}>
               <strong>{e.title}</strong> — Status: <em>{e.status}</em><br />
-              ✅ {approvedCount} | ❌ {rejectedCount} | ⏳ {pendingCount}
+              ✅ {approved} | ❌ {rejected} | ⏳ {pending}
             </div>
           );
         });
@@ -110,10 +111,9 @@ function CoordinatorDashboard() {
   };
 
   return (
-    <div>
+    <LayoutWrapper title="Coordinator Dashboard">
       <LogoutButton />
       {loading ? <Loader /> : <Dashboard headings={headings} renderContent={renderTileContent} />}
-
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         {selectedEvent && (
           <div>
@@ -133,7 +133,7 @@ function CoordinatorDashboard() {
           </div>
         )}
       </Modal>
-    </div>
+    </LayoutWrapper>
   );
 }
 
