@@ -8,6 +8,10 @@ const {
   checkPending,
 } = require('../middleware/auth');
 
+const { getAllUsers } = require('../controllers/adminController');
+
+
+
 // ✅ Get all users (admin only)
 router.get('/users', authMiddleware, checkPending, isAdmin, async (req, res) => {
   try {
