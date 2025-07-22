@@ -59,10 +59,18 @@ const googleLogin = async (req, res) => {
     const { email } = payload;
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Ensure role and isApproved exist
+    if (!user.role || !user.isApproved) {
+      return res.status(403).json({ message: "User not approved or missing role" });
+    }
 
     const token = jwt.signToken(user);
-    res.json({ token, user });
+    res.status(200).json({ token, user });
   } catch (err) {
     console.error("❌ googleLogin error:", err);
     res.status(500).json({ message: "Login failed" });
