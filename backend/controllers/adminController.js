@@ -1,15 +1,36 @@
-// backend/controllers/adminController.js
 const User = require('../models/User');
 
-// Get all users
+// View all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().select('-passwordHash'); // Exclude passwordHash
     res.json(users);
   } catch (err) {
-    console.error("Admin: getAllUsers error", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-module.exports = { getAllUsers };
+// View all student coordinators by club
+const getCoordinatorsByClub = async (req, res) => {
+  try {
+    const coordinators = await User.find({
+      role: 'studentCoordinator',
+      isApproved: true
+    }).select('name email club');
+
+    const grouped = {};
+    coordinators.forEach(c => {
+      if (!grouped[c.club]) grouped[c.club] = [];
+      grouped[c.club].push(c);
+    });
+
+    res.json(grouped);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = {
+  getAllUsers,
+  getCoordinatorsByClub
+};

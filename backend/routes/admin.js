@@ -1,30 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-
 const {
   authMiddleware,
   isAdmin,
+  requireRole,
   checkPending,
 } = require('../middleware/auth');
 
-const { getAllUsers } = require('../controllers/adminController');
+// Admin-only controllers
+const {
+  getAllUsers,
+  getCoordinatorsByClub,
+} = require('../controllers/adminController');
 
+// ✅ Apply middleware globally for all admin routes
+router.use(authMiddleware, requireRole('admin'));
 
+// ✅ Get all users
+router.get('/users', getAllUsers);
 
-// ✅ Get all users (admin only)
-router.get('/users', authMiddleware, checkPending, isAdmin, async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.json(users);
-  } catch (err) {
-    console.error("Admin user fetch error:", err);
-    res.status(500).send("Server error");
-  }
-});
+// ✅ Get approved student coordinators grouped by club
+router.get('/coordinators', getCoordinatorsByClub);
 
-// ✅ Approve faculty registration
-router.put('/approve-faculty/:id', authMiddleware, isAdmin, async (req, res) => {
+// ✅ Approve a faculty registration request
+router.put('/approve-faculty/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user || user.desiredRole !== 'faculty') {
@@ -37,13 +37,13 @@ router.put('/approve-faculty/:id', authMiddleware, isAdmin, async (req, res) => 
 
     res.json({ message: 'Faculty approved', user });
   } catch (err) {
-    console.error("Approve error:", err);
+    console.error("Approve faculty error:", err);
     res.status(500).send("Server error");
   }
 });
 
-// REJECT user registration (admin only)
-router.delete('/reject/:id', authMiddleware, checkPending, isAdmin, async (req, res) => {
+// ✅ Reject any pending registration
+router.delete('/reject/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
@@ -52,10 +52,9 @@ router.delete('/reject/:id', authMiddleware, checkPending, isAdmin, async (req, 
     }
 
     await user.deleteOne();
-
     res.json({ message: 'User registration rejected and deleted' });
   } catch (err) {
-    console.error("❌ Reject error:", err);
+    console.error("Reject error:", err);
     res.status(500).send("Server error");
   }
 });
