@@ -1,17 +1,24 @@
 .register-page {
-  max-width: 400px;
+  max-width: 500px;
   margin: auto;
+  background: #1a1a1a;
   padding: 2rem;
-  text-align: center;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+  color: white;
 }
 
-select {
-  margin: 1rem 0;
-  padding: 0.5rem;
+label, select {
+  margin-top: 1rem;
+  display: block;
+  width: 100%;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #D4B083;
 }
 
 .google-button {
-  margin: 1rem 0;
+  margin-top: 1.5rem;
 }
 
 .error {

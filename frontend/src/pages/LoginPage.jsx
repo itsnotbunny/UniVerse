@@ -1,3 +1,4 @@
+// src/pages/LoginPage.jsx
 import './AuthPages.css';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
@@ -15,6 +16,8 @@ function LoginPage() {
     })
       .then((res) => res.json())
       .then((data) => {
+        if (!data.token || !data.user) throw new Error("Invalid credentials");
+
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
@@ -27,16 +30,22 @@ function LoginPage() {
       })
       .catch((err) => {
         console.error("Google login failed:", err);
+        alert("Login failed. Please try again.");
       });
   };
 
   return (
-    <div className="auth-page">
-      <h2>Welcome to UniVerse</h2>
-      <div className="auth-form">
-        <GoogleLogin onSuccess={handleGoogleLoginSuccess} onError={() => alert("Google login failed")} />
-        <button onClick={() => navigate('/register')}>Register</button>
-        <button onClick={() => navigate('/student')}>Continue as Student</button>
+    <div className="app-container">
+      <div className="auth-page">
+        <h2>Welcome to UniVerse</h2>
+        <div className="auth-form">
+          <GoogleLogin
+            onSuccess={handleGoogleLoginSuccess}
+            onError={() => alert("Google login failed")}
+          />
+          <button onClick={() => navigate('/register')}>Register</button>
+          <button onClick={() => navigate('/student')}>Continue as Student</button>
+        </div>
       </div>
     </div>
   );

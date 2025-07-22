@@ -1,3 +1,4 @@
+// src/pages/RegisterPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
@@ -36,29 +37,31 @@ function RegisterPage() {
   };
 
   return (
-    <div className="register-page">
-      <h2>Register with Google</h2>
+    <div className="app-container">
+      <div className="register-page">
+        <h2>Register with Google</h2>
 
-      <label>Select your role:</label>
-      <select value={role} onChange={(e) => setRole(e.target.value)}>
-        <option value="">-- Select Role --</option>
-        <option value="faculty">Faculty</option>
-        <option value="studentCoordinator">Student Coordinator</option>
-      </select>
+        <label>Select your role:</label>
+        <select value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="">-- Select Role --</option>
+          <option value="faculty">Faculty</option>
+          <option value="studentCoordinator">Student Coordinator</option>
+        </select>
 
-      {role && (
-        <div className="google-button">
-          <GoogleLogin
-            onSuccess={handleGoogleRegister}
-            onError={() => setError("Google sign-in failed")}
-          />
-        </div>
-      )}
+        {role && (
+          <div className="google-button">
+            <GoogleLogin
+              onSuccess={handleGoogleRegister}
+              onError={() => setError("Google sign-in failed")}
+            />
+          </div>
+        )}
 
-      {error && <p className="error">{error}</p>}
-      {message && <p className="success">{message}</p>}
+        {error && <p className="error">{error}</p>}
+        {message && <p className="success">{message}</p>}
 
-      <button onClick={() => navigate('/')}>Back to Login</button>
+        <button onClick={() => navigate('/')}>Back to Login</button>
+      </div>
     </div>
   );
 }
