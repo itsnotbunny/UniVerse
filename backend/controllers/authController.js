@@ -31,7 +31,7 @@ const registerUser = async (req, res) => {
       name,
       email,
       role: isAdmin ? 'admin' : role,
-      isApproved: isAdmin ? true : role === 'studentCoordinator' ? null : true,
+      isApproved: isAdmin ? true : role === 'faculty' ? false : role === 'studentCoordinator' ? null : true,
     });
 
     await user.save();
