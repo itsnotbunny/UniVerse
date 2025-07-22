@@ -41,7 +41,7 @@
 /* Buttons */
 button {
   background-color: gold;
-  color: black;
+  color: rgb(253, 252, 252);
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 8px;
