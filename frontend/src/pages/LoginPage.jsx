@@ -6,11 +6,12 @@ import LayoutWrapper from '../components/LayoutWrapper';
 
 function LoginPage() {
   const navigate = useNavigate();
-
+  const API = import.meta.env.VITE_API_BASE_URL; 
+  console.log("API Base URL: ", API);
   const handleGoogleLoginSuccess = (credentialResponse) => {
     const credential = credentialResponse.credential;
 
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/google-login`, {
+    fetch(`${API}/api/auth/google-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ credential }),
