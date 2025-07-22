@@ -2,37 +2,52 @@ const User = require('../models/User');
 const jwt = require('../utils/jwt');
 
 // Register User
+const { OAuth2Client } = require('google-auth-library');
+const User = require('../models/User');
+const jwt = require('../utils/jwt');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const registerUser = async (req, res) => {
   try {
-    const { name, email, role } = req.body;
-
-    if (!name || !email || !role) {
-      return res.status(400).json({ message: "Missing required fields" });
+    const { credential, role } = req.body;
+    if (!credential || !role) {
+      return res.status(400).json({ message: "Missing credential or role" });
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) {
+    // ✅ Verify Google token
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    const isAdmin = email === 'samuel.g.priyanshu@gmail.com'; // <- change to your email
+    const isAdmin = email === 'samuel.g.priyanshu@gmail.com';
 
     const user = new User({
       name,
       email,
       role: isAdmin ? 'admin' : role,
-      isApproved: isAdmin ? true : role === 'studentCoordinator' ? null : true
+      isApproved: isAdmin ? true : role === 'studentCoordinator' ? null : true,
     });
 
     await user.save();
-
     const token = jwt.signToken(user);
+
     res.status(201).json({ token, user });
   } catch (err) {
-    console.error("❌ Registration error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ registerUser error:", err);
+    res.status(500).json({ message: "Registration failed" });
   }
 };
+
 
 // Login after registration
 const googleLogin = async (req, res) => {

@@ -1,7 +1,5 @@
-// src/pages/RegisterPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import jwtDecode from 'jwt-decode';
 import { GoogleLogin } from '@react-oauth/google';
 import './RegisterPage.css';
 
@@ -17,21 +15,13 @@ function RegisterPage() {
     if (!credential) return setError("Google authentication failed.");
 
     try {
-      const decoded = jwtDecode(credential);
-      const { name, email } = decoded;
-
       const res = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          role,
-        }),
+        body: JSON.stringify({ credential, role }),
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || 'Registration failed');
 
       localStorage.setItem('token', data.token);
@@ -40,7 +30,7 @@ function RegisterPage() {
 
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
-      console.error("Google login failed:", err);
+      console.error("Register error:", err);
       setError(err.message);
     }
   };
@@ -48,6 +38,7 @@ function RegisterPage() {
   return (
     <div className="register-page">
       <h2>Register with Google</h2>
+
       <label>Select your role:</label>
       <select value={role} onChange={(e) => setRole(e.target.value)}>
         <option value="">-- Select Role --</option>
@@ -59,7 +50,7 @@ function RegisterPage() {
         <div className="google-button">
           <GoogleLogin
             onSuccess={handleGoogleRegister}
-            onError={() => setError("Google Sign-In failed")}
+            onError={() => setError("Google sign-in failed")}
           />
         </div>
       )}
