@@ -25,6 +25,7 @@ select {
   color: white;
   border-radius: 8px;
   border: 1px solid #555;
+  margin-bottom: 0.01rem;
 }
 
 .google-button > div {
@@ -41,7 +42,13 @@ select {
 }
 
 .google-btn-wrapper {
-  display: flex;
-  justify-content: center;
-  margin: 0 auto;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center;
+  margin: 0.5rem auto !important;
+  width: 100%;
+}
+
+button {
+  margin-top: 1.2rem;
 }
