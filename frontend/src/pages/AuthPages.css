@@ -98,3 +98,10 @@ select {
 .register-page {
   transform: translateX(-32px);
 }
+
+@media (max-width: 768px) {
+  .auth-page .auth-form > div[style*="position: relative"] {
+    display: flex !important;
+    justify-content: center !important;
+  }
+}
