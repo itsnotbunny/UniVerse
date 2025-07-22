@@ -1,26 +1,29 @@
 // src/pages/RegisterPage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import jwtDecode from 'jwt-decode';
 import './RegisterPage.css';
 
-// Client-only dynamic import
-import { useEffect, useState as useClientState } from 'react';
-let GoogleLogin;
-if (typeof window !== 'undefined') {
-  GoogleLogin = (await import('@react-oauth/google')).GoogleLogin;
-}
+let GoogleLogin = null;
+let jwtDecode = null;
 
 function RegisterPage() {
   const [role, setRole] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const [isClient, setIsClient] = useClientState(false);
+  const [isClient, setIsClient] = useState(false);
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    setIsClient(true);
+    const loadModules = async () => {
+      const google = await import('@react-oauth/google');
+      const jwt = await import('jwt-decode');
+      GoogleLogin = google.GoogleLogin;
+      jwtDecode = jwt.default;
+      setIsClient(true);
+    };
+
+    loadModules();
   }, []);
 
   const handleGoogleRegister = async (credentialResponse) => {
