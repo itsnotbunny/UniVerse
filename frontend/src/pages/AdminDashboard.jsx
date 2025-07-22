@@ -42,9 +42,11 @@ function AdminDashboard() {
   const fetchPendingFaculty = async () => {
     try {
       const res = await axios.get('${API}/api/users/faculty-pending');
-      setPendingFaculty(res.data || []);
+      console.log("✅ Fetched faculty:", res.data);
+      setPendingFaculty(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Failed to fetch pending faculty:", err);
+      setPendingFaculty([]); // fallback
     }
   };
 
@@ -97,21 +99,18 @@ function AdminDashboard() {
     }
 
     if (heading === 'Faculty Registration') {
-      return pendingFaculty.length > 0 ? (
-        pendingFaculty.map((f, i) => (
-          <div key={i} className="tile-content" style={{ marginBottom: "1rem" }}>
-            <strong>{f.name}</strong> — {f.email}
-            <div style={{ marginTop: "0.5rem" }}>
-              <button onClick={() => handleActionClick(f, "approve")}>Approve</button>
-              <button
-                onClick={() => handleActionClick(f, "reject")}
-                style={{ marginLeft: "0.5rem", backgroundColor: "crimson", color: "white" }}
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        ))
+      return Array.isArray(pendingFaculty) && pendingFaculty.length > 0 ? (
+        <ul>
+          {pendingFaculty.map((f, i) => (
+            <li key={i}>
+              {f.name} — {f.email}
+              <div style={{ marginTop: "0.5rem" }}>
+                <button onClick={() => handleActionClick(f, "approve")}>Approve</button>
+                <button onClick={() => handleActionClick(f, "reject")}>Reject</button>
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : (
         <p>No pending faculty approvals</p>
       );
