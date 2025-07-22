@@ -75,8 +75,26 @@ select {
   text-align: center;
 }
 
-.google-button > div {
-  margin: 0 auto !important;
+/* Wrapper that centers login/register tile */
+.auth-center-wrapper {
+  width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+/* Google button fix */
+.google-button > div {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+.google-button iframe {
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+.register-page {
+  transform: translateX(-30px);
 }

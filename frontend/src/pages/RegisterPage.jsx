@@ -38,31 +38,33 @@ function RegisterPage() {
 
   return (
     <LayoutWrapper title="Register" center>
-      <div className="register-wrapper">
+      <div className="auth-center-wrapper">
+        <div className="register-wrapper">
 
-        <div className="auth-page register-page">
-          <h2>Register with Google</h2>
+          <div className="auth-page register-page">
+            <h2>Register with Google</h2>
 
-          <label>Select your role:</label>
-          <select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="">-- Select Role --</option>
-            <option value="faculty">Faculty</option>
-            <option value="studentCoordinator">Student Coordinator</option>
-          </select>
+            <label>Select your role:</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="">-- Select Role --</option>
+              <option value="faculty">Faculty</option>
+              <option value="studentCoordinator">Student Coordinator</option>
+            </select>
 
-          {role && (
-            <div className="google-button">
-              <GoogleLogin
-                onSuccess={handleGoogleRegister}
-                onError={() => setError("Google sign-in failed")}
-                />
-            </div>
-          )}
+            {role && (
+              <div className="google-button">
+                <GoogleLogin
+                  onSuccess={handleGoogleRegister}
+                  onError={() => setError("Google sign-in failed")}
+                  />
+              </div>
+            )}
 
-          {error && <p className="error">{error}</p>}
-          {message && <p className="success">{message}</p>}
+            {error && <p className="error">{error}</p>}
+            {message && <p className="success">{message}</p>}
 
-          <button onClick={() => navigate('/')}>Back to Login</button>
+            <button onClick={() => navigate('/')}>Back to Login</button>
+          </div>
         </div>
       </div>
     </LayoutWrapper>

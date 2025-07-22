@@ -34,15 +34,17 @@ function LoginPage() {
 
   return (
     <LayoutWrapper title="Welcome to UniVerse" center>
-      <div className="auth-page">
-        <div className="auth-form">
-          <h2>Choose Login Method</h2>
-          <GoogleLogin
-            onSuccess={handleGoogleLoginSuccess}
-            onError={() => alert("Google login failed")}
-          />
-          <button onClick={() => navigate('/register')}>Register</button>
-          <button onClick={() => navigate('/student')}>Continue as Student</button>
+      <div className="auth-center-wrapper">
+        <div className="auth-page">
+          <div className="auth-form">
+            <h2>Choose Login Method</h2>
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={() => alert("Google login failed")}
+              />
+            <button onClick={() => navigate('/register')}>Register</button>
+            <button onClick={() => navigate('/student')}>Continue as Student</button>
+          </div>
         </div>
       </div>
     </LayoutWrapper>
