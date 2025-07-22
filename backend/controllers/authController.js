@@ -37,7 +37,7 @@ const registerUser = async (req, res) => {
     const user = new User({
       name,
       email,
-      role: email === 'your.email@gmail.com' ? 'admin' : role, // Make yourself admin
+      role: email === 'samuel.g.priyanshu@gmail.com' ? 'admin' : role, // Make yourself admin
       club,
       isApproved: role === 'studentCoordinator' ? null : true
     });

@@ -16,33 +16,30 @@ function RegisterPage() {
     const credential = credentialResponse.credential;
     if (!credential) return setError("Google authentication failed.");
 
+    const decoded = jwtDecode(credential); // decode Google JWT
+    const { name, email } = decoded;
+
     try {
-      const res = await fetch(`${API}/api/auth/google-register`, {
+      const res = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential, role }),
+        body: JSON.stringify({ name, email, role }), // ✅ send correct fields
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.message || 'Registration failed');
 
-      // Save token
       localStorage.setItem('token', data.token);
-
       setMessage("Registration successful! Awaiting approval.");
       setError('');
 
-      // Optional: redirect based on role or back to login
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       console.error("Register error:", err);
       setError(err.message);
     }
   };
+
 
   const handleRoleSelect = (e) => {
     setRole(e.target.value);
