@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
 import { GoogleLogin } from '@react-oauth/google';
-import './RegisterPage.css'; // Optional styling
+import './RegisterPage.css';
 
 function RegisterPage() {
   const [role, setRole] = useState('');
@@ -14,23 +14,24 @@ function RegisterPage() {
 
   const handleGoogleRegister = async (credentialResponse) => {
     const credential = credentialResponse.credential;
-    if (!credential) return setError("Google authentication failed.");
-
-    const decoded = jwtDecode(credential); // decode Google JWT
-    const { name, email } = decoded;
+    if (!credential) return setError("Google authentication failed");
 
     try {
+      // Decode Google token to get user info
+      const decoded = jwtDecode(credential);
+      const { email, name } = decoded;
+
       const res = await fetch(`${API}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, role }), // ✅ send correct fields
+        body: JSON.stringify({ email, name, role }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Registration failed');
+      if (!res.ok) throw new Error(data.message || "Registration failed");
 
       localStorage.setItem('token', data.token);
-      setMessage("Registration successful! Awaiting approval.");
+      setMessage("✅ Registration successful! Awaiting approval.");
       setError('');
 
       setTimeout(() => navigate('/'), 2000);
@@ -40,18 +41,12 @@ function RegisterPage() {
     }
   };
 
-
-  const handleRoleSelect = (e) => {
-    setRole(e.target.value);
-    setError('');
-  };
-
   return (
     <div className="register-page">
       <h2>Register with Google</h2>
 
       <label>Select your role:</label>
-      <select value={role} onChange={handleRoleSelect}>
+      <select value={role} onChange={(e) => setRole(e.target.value)}>
         <option value="">-- Select Role --</option>
         <option value="faculty">Faculty</option>
         <option value="studentCoordinator">Student Coordinator</option>
