@@ -18,6 +18,8 @@ function LoginPage() {
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log("Login Response: ", data);
+        if(!data.user) throw new Error("User object missing from response");
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
