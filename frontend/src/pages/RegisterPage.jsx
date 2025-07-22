@@ -2,22 +2,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jwtDecode from 'jwt-decode';
-import { GoogleLogin } from '@react-oauth/google';
 import './RegisterPage.css';
+
+// Client-only dynamic import
+import { useEffect, useState as useClientState } from 'react';
+let GoogleLogin;
+if (typeof window !== 'undefined') {
+  GoogleLogin = (await import('@react-oauth/google')).GoogleLogin;
+}
 
 function RegisterPage() {
   const [role, setRole] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [isClient, setIsClient] = useClientState(false);
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleGoogleRegister = async (credentialResponse) => {
     const credential = credentialResponse.credential;
     if (!credential) return setError("Google authentication failed");
 
     try {
-      // Decode Google token to get user info
       const decoded = jwtDecode(credential);
       const { email, name } = decoded;
 
@@ -52,9 +62,12 @@ function RegisterPage() {
         <option value="studentCoordinator">Student Coordinator</option>
       </select>
 
-      {role && (
+      {role && isClient && GoogleLogin && (
         <div className="google-button">
-          <GoogleLogin onSuccess={handleGoogleRegister} onError={() => setError("Google sign-in failed")} />
+          <GoogleLogin
+            onSuccess={handleGoogleRegister}
+            onError={() => setError("Google sign-in failed")}
+          />
         </div>
       )}
 
