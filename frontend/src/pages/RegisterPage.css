@@ -27,6 +27,8 @@ select {
   border: 1px solid #555;
 }
 
-.google-button {
-  margin: 1rem 0;
+.google-button > div {
+  margin: 0 auto !important;
+  display: flex;
+  justify-content: center;
 }
