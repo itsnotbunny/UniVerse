@@ -100,8 +100,14 @@ select {
 }
 
 @media (max-width: 768px) {
-  .auth-page .auth-form > div[style*="position: relative"] {
-    display: flex !important;
-    justify-content: center !important;
+  .google-btn-wrapper {
+    width: 100%;
+    justify-content: center;
   }
+}
+
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
 }

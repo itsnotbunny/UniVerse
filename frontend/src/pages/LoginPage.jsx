@@ -38,10 +38,12 @@ function LoginPage() {
         <div className="auth-page">
           <div className="auth-form">
             <h2>Choose Login Method</h2>
-            <GoogleLogin
-              onSuccess={handleGoogleLoginSuccess}
-              onError={() => alert("Google login failed")}
-              />
+            <div className="google-btn-wrapper">
+              <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onError={() => alert("Google login failed")}
+                />
+            </div>
             <button onClick={() => navigate('/register')}>Register</button>
             <button onClick={() => navigate('/student')}>Continue as Student</button>
           </div>

@@ -32,3 +32,16 @@ select {
   display: flex;
   justify-content: center;
 }
+
+@media (max-width: 768px) {
+  .google-btn-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+}
