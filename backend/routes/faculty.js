@@ -33,7 +33,7 @@ router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, 
 router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) => {
   try {
     console.log("Fetching pending faculty...");
-    const pending = await User.find({ role: 'faculty', isApproved: false });
+    const pending = await User.find({ role: 'faculty', isApproved: null });
     console.log("Pending faculty: ", pending);
     res.json(pending);
   } catch (err) {
