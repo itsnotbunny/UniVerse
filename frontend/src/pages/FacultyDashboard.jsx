@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+
 import LogoutButton from '../components/LogoutButton';
 import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
@@ -10,12 +11,16 @@ function FacultyDashboard() {
   const [events, setEvents] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [activeTile, setActiveTile] = useState('');
   const [comment, setComment] = useState('');
   const [suggestMode, setSuggestMode] = useState(false);
   const [suggestion, setSuggestion] = useState('');
+
+  const [selectedCoordinator, setSelectedCoordinator] = useState(null);
+  const [modalType, setModalType] = useState(null); // 'approve' or 'reject'
 
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
@@ -38,8 +43,8 @@ function FacultyDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [eventRes, userRes] = await Promise.all([
-        axios.get(`${API}/api/events/pending`, { headers }),
-        axios.get(`${API}/api/faculty/users`, { headers }),
+        axios.get(`${API}/api/events/pending, { headers }`),
+        axios.get(`${API}/api/faculty/users, { headers }`),
       ]);
       setEvents(eventRes.data);
       setUsers(userRes.data);
@@ -103,42 +108,59 @@ function FacultyDashboard() {
     }
   };
 
-  const approveCoordinator = async (userId) => {
+  const handleConfirmCoordinatorAction = async () => {
+    const id = selectedCoordinator._id;
     try {
-      await axios.put(`${API}/api/faculty/approve-coordinator/${userId}`, {
-        role: 'studentCoordinator'
-      }, { headers: { Authorization: `Bearer ${token}` } });
+      if (modalType === 'approve') {
+        await axios.put(
+          `${API}/api/faculty/approve-coordinator/${id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert(`✅ Approved ${selectedCoordinator.name} as Student Coordinator`);
+      } else if (modalType === 'reject') {
+        await axios.delete(
+          `${API}/api/faculty/users/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert(`❌ Rejected ${selectedCoordinator.name}`);
+      }
+      setSelectedCoordinator(null);
+      setModalType(null);
       fetchData();
     } catch (err) {
-      console.error("❌ Coordinator approval error:", err);
-    }
-  };
-
-  const rejectCoordinator = async (userId) => {
-    try {
-      await axios.delete(`${API}/api/faculty/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchData();
-    } catch (err) {
-      console.error("❌ Coordinator rejection error:", err);
+      console.error("❌ Coordinator action error:", err);
+      alert("Action failed. Please try again.");
     }
   };
 
   const renderTileContent = (heading) => {
     if (heading === 'Coordinator Approval') {
-      const pending = users.filter(u => u.role === 'studentCoordinator' &&
-        u.isApproved === null);
+      const pending = users.filter(u => u.role === 'studentCoordinator' && u.isApproved === null);
       return pending.length ? pending.map((u, i) => (
         <div key={i}>
           <strong>{u.name}</strong> — {u.email}
           <br />
-          <button onClick={() => approveCoordinator(u._id)}
-            style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px"}}
-            >Approve</button>
-          <button onClick={() => rejectCoordinator(u._id)} 
-          style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem"}}
-            >Reject</button>
+          <button
+            onClick={() => {
+              setSelectedCoordinator(u);
+              setModalType('approve');
+            }}
+            style={{
+              backgroundColor: "#28a745", color: "white", padding: "6px 12px",
+              border: "none", borderRadius: "4px"
+            }}
+          >Approve</button>
+          <button
+            onClick={() => {
+              setSelectedCoordinator(u);
+              setModalType('reject');
+            }}
+            style={{
+              backgroundColor: "#dc3545", color: "white", padding: "6px 12px",
+              border: "none", borderRadius: "4px", marginLeft: "1rem"
+            }}
+          >Reject</button>
         </div>
       )) : <p>No pending coordinator requests.</p>;
     }
@@ -198,6 +220,8 @@ function FacultyDashboard() {
     <LayoutWrapper title="Faculty Dashboard">
       <LogoutButton />
       {loading ? <Loader /> : <Dashboard headings={headings} renderContent={renderTileContent} />}
+
+      {/* Event Modal */}
       <Modal isOpen={modalOpen} onClose={() => {
         setModalOpen(false);
         setSuggestMode(false);
@@ -223,12 +247,8 @@ function FacultyDashboard() {
               <div className="popup-buttons">
                 {activeTile === 'Pending Requests' ? (
                   <>
-                    <button onClick={() => handleActionClick(f, "approve")}
-                      style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px"}}
-                      >Approve</button>
-                    <button onClick={() => handleActionClick(f, "reject")}
-                      style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem"}}
-                      >Reject</button>
+                    <button onClick={handleApprove}>Approve</button>
+                    <button onClick={handleReject}>Reject</button>
                     <button onClick={() => setSuggestMode(true)}>Suggest Edits</button>
                   </>
                 ) : (
@@ -239,6 +259,31 @@ function FacultyDashboard() {
                 )}
               </div>
             )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Coordinator Confirm Modal */}
+      <Modal isOpen={!!selectedCoordinator && !!modalType} onClose={() => {
+        setSelectedCoordinator(null);
+        setModalType(null);
+      }}>
+        {selectedCoordinator && (
+          <div>
+            <h3>Confirm {modalType === 'approve' ? 'Approval' : 'Rejection'}</h3>
+            <p>
+              Are you sure you want to <strong>{modalType}</strong>{" "}
+              <strong>{selectedCoordinator.name}</strong> as Student Coordinator?
+            </p>
+            <div style={{ marginTop: "1rem" }}>
+              <button onClick={handleConfirmCoordinatorAction}>
+                Yes, {modalType.charAt(0).toUpperCase() + modalType.slice(1)}
+              </button>
+              <button onClick={() => {
+                setSelectedCoordinator(null);
+                setModalType(null);
+              }} style={{ marginLeft: "10px" }}>Cancel</button>
+            </div>
           </div>
         )}
       </Modal>
