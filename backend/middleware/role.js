@@ -1,29 +1,30 @@
 // backend/middleware/role.js
 
-function requireRole(requiredRole) {
+/**
+ * Middleware to check if the user has one of the required roles
+ * @param {string|string[]} roles - A string or array of roles
+ */
+function requireRole(roles) {
+  const allowedRoles = Array.isArray(roles) ? roles : [roles];
+
   return (req, res, next) => {
-    if (!req.user || req.user.role !== requiredRole) {
-      return res.status(403).json({ message: 'Access denied: role mismatch' });
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized: No user found in request.' });
     }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: `Access denied: Requires role ${allowedRoles.join(' or ')}` });
+    }
+
     next();
   };
 }
 
-function isAdmin(req, res, next) {
-  return requireRole('admin')(req, res, next);
-}
-
-function isFaculty(req, res, next) {
-  return requireRole('faculty')(req, res, next);
-}
-
-function isCoordinator(req, res, next) {
-  return requireRole('studentCoordinator')(req, res, next);
-}
-
-function isStudent(req, res, next) {
-  return requireRole('student')(req, res, next);
-}
+// Named exports for common roles
+const isAdmin = requireRole('admin');
+const isFaculty = requireRole('faculty');
+const isCoordinator = requireRole('studentCoordinator');
+const isStudent = requireRole('student');
 
 module.exports = {
   requireRole,
