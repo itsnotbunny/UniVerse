@@ -42,4 +42,14 @@ router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) =>
   }
 });
 
+router.patch('/approve/:id', authMiddleware, requireRole('admin'), async (req, res) => {
+  const faculty = await User.findByIdAndUpdate(req.params.id, { isApproved: true }, { new: true });
+  res.json(faculty);
+});
+
+router.patch('/reject/:id', authMiddleware, requireRole('admin'), async (req, res) => {
+  const faculty = await User.findByIdAndUpdate(req.params.id, { isApproved: false }, { new: true });
+  res.json(faculty);
+});
+
 module.exports = router;
