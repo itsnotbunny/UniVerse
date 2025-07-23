@@ -8,6 +8,7 @@ const {
 } = require('../controllers/authController');
 
 const { authMiddleware } = require('../middleware/auth'); // ✅ Proper importconst { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 
 
 router.post('/google-login', googleLogin);

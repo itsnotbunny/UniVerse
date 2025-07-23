@@ -54,5 +54,4 @@ module.exports = {
   isCoordinator,
   isStudent,
   checkPending,
-  requireRole,
 };
