@@ -7,6 +7,11 @@ const { requireRole } = require('../middleware/role');          // ✅ from role
 
 const router = express.Router();
 
+router.get('/coordinators', authMiddleware, requireRole('admin'), async (req, res) => {
+  const coordinators = await User.find({ role: 'studentCoordinator' });
+  res.json(coordinators);
+});
+
 // View pending student coordinator registrations
 router.get('/pending', authMiddleware, requireRole('faculty'), async (req, res) => {
   if (req.user.facultyRole !== 'clubCoordinator') {

@@ -21,7 +21,7 @@ mongoose.connect(process.env.MONGODB_URI)
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/events', require('./routes/events'));
-app.use('/api/student-coordinators', require('./routes/studentCoordinator'));
+app.use('/api/studentcoordinator', require('./routes/studentCoordinator'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/ideas', require('./routes/ideas'));
 
