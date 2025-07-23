@@ -43,8 +43,8 @@ function FacultyDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [eventRes, userRes] = await Promise.all([
-        axios.get(`${API}/api/events/pending, { headers }`),
-        axios.get(`${API}/api/faculty/users, { headers }`),
+        axios.get(`${API}/api/events/pending`, { headers }),
+        axios.get(`${API}/api/faculty/users`, { headers }),
       ]);
       setEvents(eventRes.data);
       setUsers(userRes.data);
