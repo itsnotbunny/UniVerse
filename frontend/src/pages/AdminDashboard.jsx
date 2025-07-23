@@ -2,64 +2,86 @@ import LayoutWrapper from '../components/LayoutWrapper';
 import Dashboard from '../components/Dashboard';
 import LogoutButton from '../components/LogoutButton';
 import Loader from '../components/Loader';
-import Modal from '../components/Modal'; // ✅ Ensure this exists or I can provide one
+import Modal from '../components/Modal';
+
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [coordinators, setCoordinators] = useState([]);
+  const [faculty, setFaculty] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [pendingFaculty, setPendingFaculty] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState("");
 
   const API = import.meta.env.VITE_API_BASE_URL;
+  const token = localStorage.getItem("token");
 
   const headings = [
     'Dance', 'Music', 'Photography', 'Art',
     'Technical', 'Literary', 'Fashion', 'Book',
-    'Student Coordinators', 'User Database',
-    'Faculty Registration'
+    'Student Coordinators', 'All Faculty',
+    'User Database', 'Faculty Registration'
   ];
 
   useEffect(() => {
     fetchCoordinators();
+    fetchFaculty();
+    fetchAllUsers();
     fetchPendingFaculty();
   }, []);
 
   const fetchCoordinators = async () => {
     try {
       const res = await axios.get(`${API}/api/studentcoordinator/coordinators`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-      setCoordinators(Array.isArray(res.data) ? res.data : []);
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCoordinators(res.data || []);
     } catch (err) {
-      console.error("Failed to fetch coordinators:", err);
-    } finally {
-      setLoading(false);
+      console.error("❌ Failed to fetch coordinators:", err);
+    }
+  };
+
+  const fetchFaculty = async () => {
+    try {
+      const res = await axios.get(`${API}/api/admin/faculty`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFaculty(res.data || []);
+    } catch (err) {
+      console.error("❌ Failed to fetch faculty:", err);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    try {
+      const res = await axios.get(`${API}/api/admin/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAllUsers(res.data || []);
+    } catch (err) {
+      console.error("❌ Failed to fetch all users:", err);
     }
   };
 
   const fetchPendingFaculty = async () => {
     try {
       const res = await axios.get(`${API}/api/faculty/pending`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("✅ Fetched faculty:", res.data);
       setPendingFaculty(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("Failed to fetch pending faculty:", err);
+      console.error("❌ Failed to fetch pending faculty:", err);
       setPendingFaculty([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleActionClick = (faculty, type) => {
-    console.log(`Modal open for ${type} ${faculty.name}`);
     setSelectedFaculty(faculty);
     setActionType(type);
     setShowModal(true);
@@ -73,25 +95,15 @@ function AdminDashboard() {
         actionType === "approve"
           ? `${API}/api/faculty/approve/${selectedFaculty._id}`
           : `${API}/api/faculty/reject/${selectedFaculty._id}`;
-      
-      console.log("Patch to: ", endpoint);
-      console.log("seding approval/rejection request...");
+
       await axios.patch(endpoint, {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Request succeeded");
 
-      // ✅ Show success message
       alert(`Successfully ${actionType}ed ${selectedFaculty.name}`);
-
-      // ✅ Reset modal state
       setShowModal(false);
       setSelectedFaculty(null);
       setActionType("");
-
-      // ✅ Refresh pending faculty
       fetchPendingFaculty();
     } catch (err) {
       console.error("❌ Action failed:", err);
@@ -116,8 +128,55 @@ function AdminDashboard() {
       );
     }
 
+    if (heading === 'All Faculty') {
+      return (
+        <ul>
+          {faculty.map((f, i) => (
+            <li key={i}>
+              {f.name} — {f.email} {f.facultyRole ? (`${f.facultyRole}`) : ''}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
     if (heading === 'User Database') {
-      return <p>Full user list to be implemented</p>;
+      const grouped = allUsers.reduce((acc, user) => {
+        const role = user.role || 'unknown';
+        if (!acc[role]) acc[role] = [];
+        acc[role].push(user);
+        return acc;
+      }, {});
+
+      return (
+        <div>
+          {Object.entries(grouped).map(([role, users]) => (
+            <div key={role} style={{ marginBottom: "2rem" }}>
+              <h4>{role.charAt(0).toUpperCase() + role.slice(1)}s</h4>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Club</th>
+                    <th>Approved?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u, i) => (
+                    <tr key={i}>
+                      <td>{u.name}</td>
+                      <td>{u.email}</td>
+                      <td>{u.club || '-'}</td>
+                      <td>{u.isApproved === true ? "✅" : u.isApproved === false ? "❌" : "⏳"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
+      );
     }
 
     if (heading === 'Faculty Registration') {
@@ -128,11 +187,11 @@ function AdminDashboard() {
               {f.name} — {f.email}
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={() => handleActionClick(f, "approve")}
-                  style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px"}}
+                  style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px" }}
                 >Approve</button>
                 <button onClick={() => handleActionClick(f, "reject")}
-                  style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem"}}
-                  >Reject</button>
+                  style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem" }}
+                >Reject</button>
               </div>
             </li>
           ))}
@@ -154,21 +213,15 @@ function AdminDashboard() {
         <Dashboard headings={headings} renderContent={renderTileContent} />
       )}
 
-      {/* ✅ Modal shown when Approve/Reject clicked */}
       {showModal && (
         <Modal isOpen={showModal} onClose={handleCloseModal}>
           <h3>Confirm {actionType === "approve" ? "Approval" : "Rejection"}</h3>
           <p>
-            Are you sure you want to {actionType}{" "}
-            <strong>{selectedFaculty?.name}</strong>?
+            Are you sure you want to {actionType} <strong>{selectedFaculty?.name}</strong>?
           </p>
           <div style={{ marginTop: "1rem" }}>
-            <button onClick={handleConfirmAction}>
-              Yes, Confirm
-            </button>
-            <button onClick={handleCloseModal} style={{ marginLeft: "0.5rem" }}>
-              Cancel
-            </button>
+            <button onClick={handleConfirmAction}>Yes, Confirm</button>
+            <button onClick={handleCloseModal} style={{ marginLeft: "0.5rem" }}>Cancel</button>
           </div>
         </Modal>
       )}
