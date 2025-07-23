@@ -41,7 +41,7 @@ function AdminDashboard() {
 
   const fetchPendingFaculty = async () => {
     try {
-      const res = await axios.get('${API}/api/faculty/faculty-pending');
+      const res = await axios.get('${API}/api/faculty/pending');
       console.log("✅ Fetched faculty:", res.data);
       setPendingFaculty(Array.isArray(res.data) ? res.data : []);
     } catch (err) {

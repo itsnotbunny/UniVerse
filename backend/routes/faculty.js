@@ -6,6 +6,7 @@ const {
   authMiddleware,
   isFaculty,
   checkPending,
+  requireRole,
 } = require('../middleware/auth');
 
 // ✅ Approve coordinator registrations
@@ -28,10 +29,10 @@ router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, 
 });
 
 // ✅ Get all faculty who are not yet approved
-router.get('/pending', async (req, res) => {
+router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) => {
   try {
-    const pendingFaculty = await User.find({ role: 'faculty', isApproved: false });
-    res.json(pendingFaculty);
+    const pending = await Faculty.find({ role: 'faculty', isApproved: false });
+    res.json(pending);
   } catch (err) {
     console.error("❌ Failed to fetch pending faculty:", err);
     res.status(500).json({ message: "Server error" });
