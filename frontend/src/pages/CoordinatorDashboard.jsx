@@ -23,7 +23,8 @@ function CoordinatorDashboard() {
     'Events Status',
     'Faculty Status',
     'Faculty List',
-    'Event Organisation'
+    'Event Organisation',
+    'Club Showcase Uploader'
   ];
 
   useEffect(() => {
@@ -105,6 +106,18 @@ function CoordinatorDashboard() {
           <textarea placeholder="Describe event flow..." style={{ width: '100%', height: '120px' }}></textarea>
         );
 
+      case 'Club Showcase Uploader':
+        return (
+          <form onSubmit={handleShowcaseSubmit}>
+            <input type="text" value={showcase.club} onChange={e => setShowcase({ ...showcase, club: e.target.value })} placeholder="Club" required />
+            <input type="text" value={showcase.title} onChange={e => setShowcase({ ...showcase, title: e.target.value })} placeholder="Title" required />
+            <input type="text" value={showcase.imageUrl} onChange={e => setShowcase({ ...showcase, imageUrl: e.target.value })} placeholder="Image URL" />
+            <input type="text" value={showcase.linkUrl} onChange={e => setShowcase({ ...showcase, linkUrl: e.target.value })} placeholder="Registration Link" />
+            <textarea value={showcase.description} onChange={e => setShowcase({ ...showcase, description: e.target.value })} placeholder="Description"></textarea>
+            <button type="submit">Upload</button>
+          </form>
+        );
+      
       default:
         return <p>Coming soon...</p>;
     }

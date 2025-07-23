@@ -1,4 +1,3 @@
-// StudentDashboard.jsx
 import { useEffect, useState } from 'react';
 import LogoutButton from '../components/LogoutButton';
 import LayoutWrapper from '../components/LayoutWrapper';
@@ -8,7 +7,9 @@ import axios from 'axios';
 
 function StudentDashboard() {
   const [events, setEvents] = useState([]);
+  const [showcaseItems, setShowcaseItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const API = import.meta.env.VITE_API_BASE_URL;
 
   const headings = [
@@ -18,6 +19,7 @@ function StudentDashboard() {
 
   useEffect(() => {
     fetchPublicEvents();
+    fetchShowcaseItems();
   }, []);
 
   const fetchPublicEvents = async () => {
@@ -32,25 +34,51 @@ function StudentDashboard() {
     }
   };
 
+  const fetchShowcaseItems = async () => {
+    try {
+      const res = await axios.get(`${API}/api/showcase/public`);
+      setShowcaseItems(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("❌ Showcase fetch failed:", err);
+      setShowcaseItems([]);
+    }
+  };
+
   const renderTileContent = (club) => {
-    const filtered = events.filter(
+    const eventsForClub = events.filter(
       (e) => e.clubName?.toLowerCase() === club.toLowerCase()
     );
+    const showcaseForClub = showcaseItems.filter(
+      (s) => s.club?.toLowerCase() === club.toLowerCase()
+    );
 
-    return filtered.length > 0 ? (
-      filtered.map((ev, i) => (
-        <div key={i} className="event-card">
-          <strong>{ev.title}</strong> — {new Date(ev.eventDate).toLocaleDateString()}<br />
-          <p>{ev.description}</p>
-          <ul>
-            {ev.registrationLinks.map((link, j) => (
-              <li key={j}><a href={link} target="_blank">{link}</a></li>
-            ))}
-          </ul>
-        </div>
-      ))
-    ) : (
-      <p>No events available for this club.</p>
+    return (
+      <>
+        <h4>Events</h4>
+        {eventsForClub.length ? eventsForClub.map((ev, i) => (
+          <div key={i} className="event-card">
+            <strong>{ev.title}</strong> — {new Date(ev.eventDate).toLocaleDateString()}<br />
+            <p>{ev.description}</p>
+            <ul>
+              {ev.registrationLinks.map((link, j) => (
+                <li key={j}><a href={link} target="_blank" rel="noreferrer">{link}</a></li>
+              ))}
+            </ul>
+          </div>
+        )) : <p>No events for this club.</p>}
+
+        <h4 style={{ marginTop: '1rem' }}>Showcase</h4>
+        {showcaseForClub.length ? showcaseForClub.map((item, i) => (
+          <div key={i} className="showcase-card" style={{ marginTop: '0.5rem' }}>
+            <strong>{item.title}</strong><br />
+            {item.imageUrl && (
+              <img src={item.imageUrl} alt={item.title} style={{ maxWidth: '100%', maxHeight: '200px', marginTop: '0.5rem' }} />
+            )}
+            <p>{item.description}</p>
+            {item.linkUrl && <a href={item.linkUrl} target="_blank" rel="noreferrer">🔗 Link</a>}
+          </div>
+        )) : <p>No showcase items.</p>}
+      </>
     );
   };
 

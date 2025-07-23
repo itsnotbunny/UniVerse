@@ -34,6 +34,7 @@ app.use('/api/events', require('./routes/events'));
 app.use('/api/studentcoordinator', require('./routes/studentCoordinator'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/ideas', require('./routes/ideas'));
+app.use('/api/showcase', require('./routes/showcase'));
 
 app.get('/', (req, res) => res.send('Server running'));
 
