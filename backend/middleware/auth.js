@@ -46,6 +46,15 @@ const checkPending = (req, res, next) => {
   next();
 };
 
+exports.requireRole = (role) => {
+  return (req, res, next) => {
+    if (!req.user || req.user.role !== role) {
+      return res.status(403).json({ message: 'Forbidden: insufficient role' });
+    }
+    next();
+  };
+};
+
 // ✅ Export all middleware
 module.exports = {
   authMiddleware,
