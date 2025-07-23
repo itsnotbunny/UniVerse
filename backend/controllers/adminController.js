@@ -3,7 +3,7 @@ const User = require('../models/User');
 // View all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-passwordHash'); // Exclude passwordHash
+    const users = await User.find(); // Exclude passwordHash
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });

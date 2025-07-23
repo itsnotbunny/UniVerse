@@ -127,9 +127,8 @@ function FacultyDashboard() {
 
   const renderTileContent = (heading) => {
     if (heading === 'Coordinator Approval') {
-      const pending = users.filter(u => u.desiredRole === 'studentCoordinator' &&
-        (u.isApproved === null || u.isApproved === false)
-      );
+      const pending = users.filter(u => u.role === 'studentCoordinator' &&
+        u.isApproved === null);
       return pending.length ? pending.map((u, i) => (
         <div key={i}>
           <strong>{u.name}</strong> — {u.email}
