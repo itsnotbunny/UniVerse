@@ -14,6 +14,10 @@ const {
   getCoordinatorsByClub,
 } = require('../controllers/adminController');
 
+const { getAllFaculty } = require('../controllers/adminController');
+
+router.get('/faculty', requireRole('admin'), getAllFaculty);
+
 // ✅ Apply middleware globally for all admin routes
 router.use(authMiddleware, requireRole('admin'));
 

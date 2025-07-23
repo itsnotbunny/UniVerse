@@ -130,26 +130,13 @@ function AdminDashboard() {
 
     if (heading === 'All Faculty') {
       return (
-        <table className="dashboard-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Faculty Role</th>
-              <th>Online</th>
-            </tr>
-          </thead>
-          <tbody>
-            {faculty.map((f, i) => (
-              <tr key={i}>
-                <td>{f.name}</td>
-                <td>{f.email}</td>
-                <td>{f.facultyRole || 'N/A'}</td>
-                <td>{f.isOnline ? '🟢' : '⚫'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ul>
+          {faculty.map((f, i) => (
+            <li key={i}>
+              {f.name} {f.facultyRole ? `— ${f.facultyRole}` : ''}
+            </li>
+          ))}
+        </ul>
       );
     }
 
@@ -171,24 +158,13 @@ function AdminDashboard() {
               <h4 style={{ color: 'gold', marginBottom: '0.5rem' }}>
                 {role === 'admin' ? 'Admins' : role === 'faculty' ? 'Facultys' : 'Student Coordinators'}
               </h4>
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    {role !== 'admin' && <th>Club</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {grouped[role].map((u, i) => (
-                    <tr key={i}>
-                      <td>{u.name}</td>
-                      <td>{u.email}</td>
-                      {role !== 'admin' && <td>{u.club || '—'}</td>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <ul>
+                {grouped[role].map((u, i) => (
+                  <li key={i}>
+                    {u.name}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
