@@ -30,7 +30,9 @@ const registerUser = async (req, res) => {
     let isApproved;
     if(isAdmin) {
       isApproved = true;
-    } else if (role === 'studentCoordinator' || role === 'faculty') {
+    } else if (role === 'studentCoordinator') {
+      isApproved = null;
+    } else if (role === 'faculty') {
       isApproved = false;
     } else {
       isApproved = true;
