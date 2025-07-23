@@ -75,12 +75,13 @@ function AdminDashboard() {
           : `${API}/api/faculty/reject/${selectedFaculty._id}`;
       
       console.log("Patch to: ", endpoint);
-
+      console.log("seding approval/rejection request...");
       await axios.patch(endpoint, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      console.log("Request succeeded");
 
       // ✅ Show success message
       alert(`Successfully ${actionType}ed ${selectedFaculty.name}`);
