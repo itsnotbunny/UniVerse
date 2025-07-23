@@ -21,6 +21,8 @@ function FacultyDashboard() {
 
   const [selectedCoordinator, setSelectedCoordinator] = useState(null);
   const [modalType, setModalType] = useState(null); // 'approve' or 'reject'
+  const [coordinatorToReject, setCoordinatorToReject] = useState(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
@@ -153,14 +155,20 @@ function FacultyDashboard() {
           >Approve</button>
           <button
             onClick={() => {
-              setSelectedCoordinator(u);
-              setModalType('reject');
+              setCoordinatorToReject(u);
+              setShowRejectModal(true);
             }}
             style={{
-              backgroundColor: "#dc3545", color: "white", padding: "6px 12px",
-              border: "none", borderRadius: "4px", marginLeft: "1rem"
+              backgroundColor: "#dc3545",
+              color: "white",
+              padding: "6px 12px",
+              border: "none",
+              borderRadius: "4px",
+              marginLeft: "1rem"
             }}
-          >Reject</button>
+          >
+            Reject
+          </button>
         </div>
       )) : <p>No pending coordinator requests.</p>;
     }
@@ -286,6 +294,33 @@ function FacultyDashboard() {
             </div>
           </div>
         )}
+      </Modal>
+      <Modal isOpen={showRejectModal} onClose={() => setShowRejectModal(false)}>
+        <div>
+          <h3>Confirm Rejection</h3>
+          <p>
+            Are you sure you want to reject{" "}
+            <strong>{coordinatorToReject?.name}</strong>?
+          </p>
+          <div style={{ marginTop: "1rem" }}>
+            <button
+              onClick={async () => {
+                await rejectCoordinator(coordinatorToReject._id);
+                setShowRejectModal(false);
+                setCoordinatorToReject(null);
+              }}
+              style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", marginRight: "1rem", border: "none", borderRadius: "4px" }}
+            >
+              Confirm Reject
+            </button>
+            <button
+              onClick={() => setShowRejectModal(false)}
+              style={{ padding: "6px 12px", border: "1px solid gray", borderRadius: "4px" }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </Modal>
     </LayoutWrapper>
   );
