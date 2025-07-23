@@ -6,39 +6,23 @@ const {
   isAdmin,
   checkPending,
 } = require('../middleware/auth');
-const { requireRole } = require('../middleware/role');
+const { requireRole } = require('../middleware/role'); // ✅ Keep this one
 
-// Admin-only controllers
 const {
   getAllUsers,
   getCoordinatorsByClub,
+  getAllFaculty,
 } = require('../controllers/adminController');
 
-const { getAllFaculty } = require('../controllers/adminController');
-
-router.get('/faculty', requireRole('admin'), getAllFaculty);
-
-// ✅ Apply middleware globally for all admin routes
+// ✅ Apply protection for all routes under /admin
 router.use(authMiddleware, requireRole('admin'));
 
-// ✅ Get all users
+// ✅ Routes
 router.get('/users', getAllUsers);
-
-// ✅ Get approved student coordinators grouped by club
+router.get('/faculty', getAllFaculty);
 router.get('/coordinators', getCoordinatorsByClub);
 
-// GET /api/admin/faculty
-router.get('/faculty', requireRole(['admin']), async (req, res) => {
-  try {
-    const faculty = await User.find({ role: 'faculty', isApproved: true });
-    res.json(faculty);
-  } catch (err) {
-    console.error("Error fetching faculty:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// ✅ Approve a faculty registration request
+// ✅ Approve faculty
 router.put('/approve-faculty/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -57,11 +41,10 @@ router.put('/approve-faculty/:id', async (req, res) => {
   }
 });
 
-// ✅ Reject any pending registration
+// ✅ Reject pending registration
 router.delete('/reject/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-
     if (!user || user.role !== 'pending') {
       return res.status(400).json({ message: 'Invalid or already processed user' });
     }
