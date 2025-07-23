@@ -105,8 +105,12 @@ function AdminDashboard() {
             <li key={i}>
               {f.name} — {f.email}
               <div style={{ marginTop: "0.5rem" }}>
-                <button onClick={() => handleActionClick(f, "approve")}>Approve</button>
-                <button onClick={() => handleActionClick(f, "reject")}>Reject</button>
+                <button onClick={() => handleActionClick(f, "approve")}
+                  style={{ backgroundColor: "#28a745", color: "white", paddding: "6px 12px", border: "none", borderRadius: "4px"}}
+                >Approve</button>
+                <button onClick={() => handleActionClick(f, "reject")}
+                  style={{ backgroundColor: "#dc3545", color: "white", paddding: "6px 12px", border: "none", borderRadius: "4px"}}
+                  >Reject</button>
               </div>
             </li>
           ))}
