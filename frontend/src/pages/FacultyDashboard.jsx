@@ -133,8 +133,12 @@ function FacultyDashboard() {
         <div key={i}>
           <strong>{u.name}</strong> — {u.email}
           <br />
-          <button onClick={() => approveCoordinator(u._id)}>Approve</button>
-          <button onClick={() => rejectCoordinator(u._id)} style={{ marginLeft: '10px' }}>Reject</button>
+          <button onClick={() => approveCoordinator(u._id)}
+            style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px"}}
+            >Approve</button>
+          <button onClick={() => rejectCoordinator(u._id)} 
+          style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem"}}
+            >Reject</button>
         </div>
       )) : <p>No pending coordinator requests.</p>;
     }
