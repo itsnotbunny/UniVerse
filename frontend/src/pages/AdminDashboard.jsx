@@ -32,7 +32,7 @@ function AdminDashboard() {
     try {
       const res = await axios.get(`${API}/api/studentcoordinator/coordinators`, {
       headers: {
-        Authorization: Bearer `${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
       setCoordinators(Array.isArray(res.data) ? res.data : []);
@@ -47,7 +47,7 @@ function AdminDashboard() {
     try {
       const res = await axios.get(`${API}/api/faculty/pending`, {
         headers: {
-          Authorization: Bearer `${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
       console.log("✅ Fetched faculty:", res.data);
