@@ -59,6 +59,7 @@ function AdminDashboard() {
   };
 
   const handleActionClick = (faculty, type) => {
+    console.log(`Modal open for ${type} ${faculty.name}`);
     setSelectedFaculty(faculty);
     setActionType(type);
     setShowModal(true);
@@ -72,6 +73,8 @@ function AdminDashboard() {
         actionType === "approve"
           ? `${API}/api/faculty/approve/${selectedFaculty._id}`
           : `${API}/api/faculty/reject/${selectedFaculty._id}`;
+      
+      console.log("Patch to: ", endpoint);
 
       await axios.patch(endpoint, {}, {
         headers: {
