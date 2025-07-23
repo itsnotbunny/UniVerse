@@ -29,7 +29,7 @@ router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, 
 });
 
 // ✅ Get all faculty who are not yet approved
-router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) => {
+router.get('/pending', async (req, res) => {
   try {
     const pending = await User.find({ role: 'faculty', isApproved: false });
     res.json(pending);
