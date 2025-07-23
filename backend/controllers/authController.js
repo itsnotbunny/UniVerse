@@ -27,11 +27,20 @@ const registerUser = async (req, res) => {
 
     const isAdmin = email === 'samuel.g.priyanshu@gmail.com';
 
+    let isApproved;
+    if(isAdmin) {
+      isApproved = true;
+    } else if (role === 'studentCoordinator' || role === 'faculty') {
+      isApproved = false;
+    } else {
+      isApproved = true;
+    }
+
     const user = new User({
       name,
       email,
       role: isAdmin ? 'admin' : role,
-      isApproved: isAdmin ? true : role === 'faculty' ? false : role === 'studentCoordinator' ? null : true,
+      isApproved,
     });
 
     await user.save();
