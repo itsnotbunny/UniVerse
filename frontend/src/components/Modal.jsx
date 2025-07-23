@@ -1,4 +1,6 @@
+// src/components/Modal.jsx
 import { useEffect } from 'react';
+import './Modal.css';
 
 function Modal({ isOpen, onClose, children }) {
   useEffect(() => {

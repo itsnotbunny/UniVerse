@@ -13,6 +13,13 @@ function CoordinatorDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [activeTile, setActiveTile] = useState('');
+  const [showcase, setShowcase] = useState({
+    club: '',
+    title: '',
+    description: '',
+    imageUrl: '',
+    linkUrl: ''
+  });
 
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
@@ -35,16 +42,35 @@ function CoordinatorDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [eventRes, facultyRes] = await Promise.all([
-        axios.get(`${API}/api/events/pending`, { headers }),
-        axios.get(`${API}/api/admin/faculty`, { headers }),
+        axios.get(`${API}/api/events/sent, { headers }`),
+        axios.get(`${API}/api/faculty/list, { headers }`),
       ]);
-
       setEvents(eventRes.data);
       setFaculty(facultyRes.data);
     } catch (err) {
-      console.error("❌ Coordinator fetch error:", err);
+      console.error('❌ Coordinator fetch error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleShowcaseSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/api/showcase`, showcase, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('✅ Showcase item uploaded!');
+      setShowcase({
+        club: '',
+        title: '',
+        description: '',
+        imageUrl: '',
+        linkUrl: ''
+      });
+    } catch (err) {
+      console.error('❌ Upload error:', err);
+      alert('Upload failed.');
     }
   };
 
@@ -58,7 +84,12 @@ function CoordinatorDashboard() {
     switch (heading) {
       case 'Events Sent':
         return events.map((e, i) => (
-          <div key={e._id || i} onClick={() => openModal(e, heading)} className="request-item" style={{ cursor: 'pointer' }}>
+          <div
+            key={e._id || i}
+            onClick={() => openModal(e, heading)}
+            className="request-item"
+            style={{ cursor: 'pointer' }}
+          >
             <strong>{e.title}</strong> — {e.clubName}
           </div>
         ));
@@ -70,7 +101,12 @@ function CoordinatorDashboard() {
           const pending = e.facultyApprovals.filter(a => a.approved === null).length;
 
           return (
-            <div key={e._id || i} onClick={() => openModal(e, heading)} className="request-item" style={{ cursor: 'pointer' }}>
+            <div
+              key={e._id || i}
+              onClick={() => openModal(e, heading)}
+              className="request-item"
+              style={{ cursor: 'pointer' }}
+            >
               <strong>{e.title}</strong> — Status: <em>{e.status}</em><br />
               ✅ {approved} | ❌ {rejected} | ⏳ {pending}
             </div>
@@ -93,31 +129,65 @@ function CoordinatorDashboard() {
 
       case 'Faculty List':
         return faculty.map((f, i) => (
-          <div key={i}>{f.name} ({f.facultyRole}) — {f.isOnline ? '🟢 Online' : '⚫ Offline'}</div>
+          <div key={i}>
+            {f.name} ({f.facultyRole}) — {f.isOnline ? '🟢 Online' : '⚫ Offline'}
+          </div>
         ));
 
       case 'Idea Board':
         return (
-          <textarea placeholder="Write ideas here..." style={{ width: '100%', height: '120px' }}></textarea>
+          <textarea
+            placeholder="Write ideas here..."
+            style={{ width: '100%', height: '120px' }}
+          ></textarea>
         );
 
       case 'Event Organisation':
         return (
-          <textarea placeholder="Describe event flow..." style={{ width: '100%', height: '120px' }}></textarea>
+          <textarea
+            placeholder="Describe event flow..."
+            style={{ width: '100%', height: '120px' }}
+          ></textarea>
         );
 
       case 'Club Showcase Uploader':
         return (
           <form onSubmit={handleShowcaseSubmit}>
-            <input type="text" value={showcase.club} onChange={e => setShowcase({ ...showcase, club: e.target.value })} placeholder="Club" required />
-            <input type="text" value={showcase.title} onChange={e => setShowcase({ ...showcase, title: e.target.value })} placeholder="Title" required />
-            <input type="text" value={showcase.imageUrl} onChange={e => setShowcase({ ...showcase, imageUrl: e.target.value })} placeholder="Image URL" />
-            <input type="text" value={showcase.linkUrl} onChange={e => setShowcase({ ...showcase, linkUrl: e.target.value })} placeholder="Registration Link" />
-            <textarea value={showcase.description} onChange={e => setShowcase({ ...showcase, description: e.target.value })} placeholder="Description"></textarea>
+            <input
+              type="text"
+              value={showcase.club}
+              onChange={(e) => setShowcase({ ...showcase, club: e.target.value })}
+              placeholder="Club"
+              required
+            />
+            <input
+              type="text"
+              value={showcase.title}
+              onChange={(e) => setShowcase({ ...showcase, title: e.target.value })}
+              placeholder="Title"
+              required
+            />
+            <input
+              type="text"
+              value={showcase.imageUrl}
+              onChange={(e) => setShowcase({ ...showcase, imageUrl: e.target.value })}
+              placeholder="Image URL"
+            />
+            <input
+              type="text"
+              value={showcase.linkUrl}
+              onChange={(e) => setShowcase({ ...showcase, linkUrl: e.target.value })}
+              placeholder="Registration Link"
+            />
+            <textarea
+              value={showcase.description}
+              onChange={(e) => setShowcase({ ...showcase, description: e.target.value })}
+              placeholder="Description"
+            ></textarea>
             <button type="submit">Upload</button>
-          </form>
-        );
-      
+          </form>
+        );
+
       default:
         return <p>Coming soon...</p>;
     }
@@ -126,7 +196,11 @@ function CoordinatorDashboard() {
   return (
     <LayoutWrapper title="Coordinator Dashboard">
       <LogoutButton />
-      {loading ? <Loader /> : <Dashboard headings={headings} renderContent={renderTileContent} />}
+      {loading ? (
+        <Loader />
+      ) : (
+        <Dashboard headings={headings} renderContent={renderTileContent} />
+      )}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         {selectedEvent && (
           <div>

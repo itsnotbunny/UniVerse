@@ -1,3 +1,5 @@
+// backend/routes/events.js
+
 const express = require('express');
 const router = express.Router();
 const sendMail = require('../utils/mailer');
@@ -5,7 +7,6 @@ const EventRequest = require('../models/EventRequest');
 const User = require('../models/User');
 const { authMiddleware } = require('../middleware/auth');
 const { requireRole } = require('../middleware/role');
-
 
 // Student Coordinator: Submit event request
 router.post('/', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
@@ -39,7 +40,7 @@ router.post('/', authMiddleware, requireRole('studentCoordinator'), async (req, 
 });
 
 // Student Coordinator: Fetch own events
-router.get('/my-events', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
+router.get('/sent', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
   const events = await EventRequest.find({ coordinator: req.user._id });
   res.json(events);
 });
@@ -60,7 +61,7 @@ router.put('/:eventId/organisation', authMiddleware, requireRole('studentCoordin
   res.send("Organising flow updated");
 });
 
-// Faculty: View events assigned to them
+// Faculty: View assigned events
 router.get('/pending', authMiddleware, requireRole('faculty'), async (req, res) => {
   const events = await EventRequest.find({
     'facultyApprovals.faculty': req.user._id

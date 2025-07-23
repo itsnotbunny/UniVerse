@@ -1,17 +1,13 @@
+// backend/routes/faculty.js
+
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
-const {
-  authMiddleware,
-  isFaculty,
-  checkPending,
-} = require('../middleware/auth');
+const { authMiddleware, isFaculty, checkPending } = require('../middleware/auth');
 const { requireRole } = require('../middleware/role');
 
-
-// ✅ Approve coordinator registrations
-// ✅ Fix logic: handle users who are already studentCoordinator but not yet approved
+// ✅ Approve student coordinator registrations (faculty only)
 router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -29,6 +25,7 @@ router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, 
   }
 });
 
+// ✅ Reject student coordinator registrations (faculty only)
 router.put('/reject-coordinator/:id', authMiddleware, checkPending, isFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -46,12 +43,10 @@ router.put('/reject-coordinator/:id', authMiddleware, checkPending, isFaculty, a
   }
 });
 
-// ✅ Get all faculty who are not yet approved
+// ✅ Admin: Get list of faculty pending approval
 router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) => {
   try {
-    console.log("Fetching pending faculty...");
     const pending = await User.find({ role: 'faculty', isApproved: null });
-    console.log("Pending faculty: ", pending);
     res.json(pending);
   } catch (err) {
     console.error("❌ Failed to fetch pending faculty:", err);
@@ -59,7 +54,7 @@ router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) =>
   }
 });
 
-// routes/faculty.js
+// ✅ Faculty-only route: View all users
 router.get('/users', authMiddleware, requireRole('faculty'), async (req, res) => {
   try {
     const users = await User.find();
@@ -69,6 +64,7 @@ router.get('/users', authMiddleware, requireRole('faculty'), async (req, res) =>
   }
 });
 
+// ✅ Admin: Approve/reject faculty
 router.patch('/approve/:id', authMiddleware, requireRole('admin'), async (req, res) => {
   const faculty = await User.findByIdAndUpdate(req.params.id, { isApproved: true }, { new: true });
   res.json(faculty);
@@ -77,6 +73,17 @@ router.patch('/approve/:id', authMiddleware, requireRole('admin'), async (req, r
 router.patch('/reject/:id', authMiddleware, requireRole('admin'), async (req, res) => {
   const faculty = await User.findByIdAndUpdate(req.params.id, { isApproved: false }, { new: true });
   res.json(faculty);
+});
+
+// ✅ Used by Coordinator Dashboard to list all faculty
+router.get('/list', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
+  try {
+    const faculty = await User.find({ role: 'faculty', isApproved: true }).select('name email facultyRole isOnline');
+    res.json(faculty);
+  } catch (err) {
+    console.error("❌ Error fetching faculty list:", err);
+    res.status(500).json({ message: 'Failed to fetch faculty list' });
+  }
 });
 
 module.exports = router;
