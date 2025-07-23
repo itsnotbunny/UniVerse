@@ -39,7 +39,7 @@ function FacultyDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
       const [eventRes, userRes] = await Promise.all([
         axios.get(`${API}/api/events/pending`, { headers }),
-        axios.get(`${API}/api/admin/users`, { headers }),
+        axios.get(`${API}/api/faculty/users`, { headers }),
       ]);
       setEvents(eventRes.data);
       setUsers(userRes.data);
@@ -116,7 +116,7 @@ function FacultyDashboard() {
 
   const rejectCoordinator = async (userId) => {
     try {
-      await axios.delete(`${API}/api/admin/users/${userId}`, {
+      await axios.delete(`${API}/api/faculty/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchData();

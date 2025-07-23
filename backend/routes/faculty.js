@@ -42,6 +42,16 @@ router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) =>
   }
 });
 
+// routes/faculty.js
+router.get('/users', authMiddleware, requireRole('faculty'), async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 router.patch('/approve/:id', authMiddleware, requireRole('admin'), async (req, res) => {
   const faculty = await User.findByIdAndUpdate(req.params.id, { isApproved: true }, { new: true });
   res.json(faculty);
