@@ -6,8 +6,9 @@ const {
   authMiddleware,
   isFaculty,
   checkPending,
-  requireRole,
 } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
+
 
 // ✅ Approve coordinator registrations
 router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, async (req, res) => {

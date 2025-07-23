@@ -4,9 +4,9 @@ const User = require('../models/User');
 const {
   authMiddleware,
   isAdmin,
-  requireRole,
   checkPending,
 } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 
 // Admin-only controllers
 const {

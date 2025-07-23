@@ -1,13 +1,4 @@
 // middleware/auth.js
-function requireRole(expectedRole) {
-  return function (req, res, next) {
-    if (!req.user || req.user.role !== expectedRole) {
-      return res.status(403).json({ message: "Access denied: Insufficient role" });
-    }
-    next();
-  };
-}
-
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
