@@ -1,10 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 
 const app = express();
-app.use(cors());
+const cors = require('cors');
+
+const allowedOrigins = [
+  'https://uni-verse-portal.vercel.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
