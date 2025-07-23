@@ -156,7 +156,7 @@ function AdminDashboard() {
 
       {/* ✅ Modal shown when Approve/Reject clicked */}
       {showModal && (
-        <Modal onClose={handleCloseModal}>
+        <Modal isOpen={showModal} onClose={handleCloseModal}>
           <h3>Confirm {actionType === "approve" ? "Approval" : "Rejection"}</h3>
           <p>
             Are you sure you want to {actionType}{" "}
