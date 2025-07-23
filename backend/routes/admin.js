@@ -1,28 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const {
-  authMiddleware,
-  isAdmin,
-  checkPending,
-} = require('../middleware/auth');
-const { requireRole } = require('../middleware/role'); // ✅ Keep this one
+
+const { authMiddleware } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 
 const {
   getAllUsers,
   getCoordinatorsByClub,
-  getAllFaculty,
+  getAllFaculty
 } = require('../controllers/adminController');
 
-// ✅ Apply protection for all routes under /admin
+// ✅ Protect all routes under /admin
 router.use(authMiddleware, requireRole('admin'));
 
-// ✅ Routes
+// ✅ GET routes
 router.get('/users', getAllUsers);
 router.get('/faculty', getAllFaculty);
 router.get('/coordinators', getCoordinatorsByClub);
 
-// ✅ Approve faculty
+// ✅ PUT /approve-faculty/:id
 router.put('/approve-faculty/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -41,7 +38,7 @@ router.put('/approve-faculty/:id', async (req, res) => {
   }
 });
 
-// ✅ Reject pending registration
+// ✅ DELETE /reject/:id
 router.delete('/reject/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);

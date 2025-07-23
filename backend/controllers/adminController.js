@@ -3,7 +3,7 @@ const User = require('../models/User');
 // View all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find(); // Exclude passwordHash
+    const users = await User.find().select('name role');
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
@@ -16,7 +16,7 @@ const getCoordinatorsByClub = async (req, res) => {
     const coordinators = await User.find({
       role: 'studentCoordinator',
       isApproved: true
-    }).select('name email club');
+    }).select('name club');
 
     const grouped = {};
     coordinators.forEach(c => {
@@ -30,7 +30,19 @@ const getCoordinatorsByClub = async (req, res) => {
   }
 };
 
+// ✅ Fixed: Include getAllFaculty inside the same object
+const getAllFaculty = async (req, res) => {
+  try {
+    const faculty = await User.find({ role: 'faculty', isApproved: true })
+      .select('name facultyRole isOnline');
+    res.json(faculty);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch faculty.' });
+  }
+};
+
 module.exports = {
   getAllUsers,
-  getCoordinatorsByClub
+  getCoordinatorsByClub,
+  getAllFaculty
 };
