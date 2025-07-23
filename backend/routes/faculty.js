@@ -31,7 +31,7 @@ router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, 
 // ✅ Get all faculty who are not yet approved
 router.get('/pending', authMiddleware, requireRole('admin'), async (req, res) => {
   try {
-    const pending = await Faculty.find({ role: 'faculty', isApproved: false });
+    const pending = await User.find({ role: 'faculty', isApproved: false });
     res.json(pending);
   } catch (err) {
     console.error("❌ Failed to fetch pending faculty:", err);

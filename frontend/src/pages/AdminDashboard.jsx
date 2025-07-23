@@ -30,7 +30,7 @@ function AdminDashboard() {
 
   const fetchCoordinators = async () => {
     try {
-      const res = await axios.get('${API}/api/studentCoordinator/coordinators');
+      const res = await axios.get(`${API}/api/studentCoordinator/coordinators`);
       setCoordinators(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Failed to fetch coordinators:", err);
@@ -41,7 +41,7 @@ function AdminDashboard() {
 
   const fetchPendingFaculty = async () => {
     try {
-      const res = await axios.get('${API}/api/faculty/pending');
+      const res = await axios.get(`${API}/api/faculty/pending`);
       console.log("✅ Fetched faculty:", res.data);
       setPendingFaculty(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
@@ -62,8 +62,8 @@ function AdminDashboard() {
     try {
       const endpoint =
         actionType === "approve"
-          ? '${API}/api/faculty/approve/${selectedFaculty._id}'
-          : '${API}/api/faculty/reject/${selectedFaculty._id}';
+          ? `${API}/api/faculty/approve/${selectedFaculty._id}`
+          : `${API}/api/faculty/reject/${selectedFaculty._id}`;
 
       await axios.patch(endpoint);
 
