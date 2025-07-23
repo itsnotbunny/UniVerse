@@ -42,8 +42,8 @@ function CoordinatorDashboard() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [eventRes, facultyRes] = await Promise.all([
-        axios.get(`${API}/api/events/sent, { headers }`),
-        axios.get(`${API}/api/faculty/list, { headers }`),
+        axios.get(`${API}/api/events/my-events`, { headers }),
+        axios.get(`${API}/api/faculty/list`, { headers }),
       ]);
       setEvents(eventRes.data);
       setFaculty(facultyRes.data);
