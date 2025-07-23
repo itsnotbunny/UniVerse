@@ -73,15 +73,25 @@ function AdminDashboard() {
           ? `${API}/api/faculty/approve/${selectedFaculty._id}`
           : `${API}/api/faculty/reject/${selectedFaculty._id}`;
 
-      await axios.patch(endpoint);
+      await axios.patch(endpoint, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
+      // ✅ Show success message
+      alert(`Successfully ${actionType}ed ${selectedFaculty.name}`);
+
+      // ✅ Reset modal state
       setShowModal(false);
       setSelectedFaculty(null);
       setActionType("");
 
-      fetchPendingFaculty(); // Refresh tile
+      // ✅ Refresh pending faculty
+      fetchPendingFaculty();
     } catch (err) {
       console.error("❌ Action failed:", err);
+      alert("Action failed. Please try again.");
     }
   };
 
@@ -117,7 +127,7 @@ function AdminDashboard() {
                   style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px"}}
                 >Approve</button>
                 <button onClick={() => handleActionClick(f, "reject")}
-                  style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px"}}
+                  style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem"}}
                   >Reject</button>
               </div>
             </li>
