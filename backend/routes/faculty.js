@@ -14,6 +14,7 @@ const { requireRole } = require('../middleware/role');
 router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
+    console.log("User being approved as coordinator:", user);
     if (!user || user.desiredRole !== 'studentCoordinator') {
       return res.status(400).json({ message: 'Invalid request' });
     }

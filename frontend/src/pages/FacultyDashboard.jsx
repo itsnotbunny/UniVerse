@@ -219,8 +219,12 @@ function FacultyDashboard() {
               <div className="popup-buttons">
                 {activeTile === 'Pending Requests' ? (
                   <>
-                    <button onClick={handleApprove}>Approve</button>
-                    <button onClick={handleReject}>Reject</button>
+                    <button onClick={() => handleActionClick(f, "approve")}
+                      style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px"}}
+                      >Approve</button>
+                    <button onClick={() => handleActionClick(f, "reject")}
+                      style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem"}}
+                      >Reject</button>
                     <button onClick={() => setSuggestMode(true)}>Suggest Edits</button>
                   </>
                 ) : (
