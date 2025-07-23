@@ -1,97 +1,51 @@
 import { useEffect, useState } from 'react';
-import LogoutButton from '../components/LogoutButton';
+import axios from 'axios';
 import LayoutWrapper from '../components/LayoutWrapper';
 import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
-import axios from 'axios';
 
 function StudentDashboard() {
-  const [events, setEvents] = useState([]);
   const [showcaseItems, setShowcaseItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const API = import.meta.env.VITE_API_BASE_URL;
+  const token = localStorage.getItem('token');
 
-  const headings = [
-    'Dance', 'Music', 'Photography', 'Art',
-    'Technical', 'Literary', 'Fashion', 'Book'
-  ];
+  const categories = ['Dance', 'Music', 'Photography', 'Art', 'Technical', 'Literary', 'Fashion', 'Book'];
 
   useEffect(() => {
-    fetchPublicEvents();
     fetchShowcaseItems();
   }, []);
 
-  const fetchPublicEvents = async () => {
+  const fetchShowcaseItems = async () => {
     try {
-      const res = await axios.get(`${API}/api/events/public`);
-      setEvents(Array.isArray(res.data) ? res.data : []);
+      const res = await axios.get(`${API}/api/showcase`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setShowcaseItems(res.data);
     } catch (err) {
-      console.error("❌ Failed to fetch public events:", err);
-      setEvents([]);
+      console.error("❌ Showcase fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchShowcaseItems = async () => {
-    try {
-      const res = await axios.get(`${API}/api/showcase/public`);
-      setShowcaseItems(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error("❌ Showcase fetch failed:", err);
-      setShowcaseItems([]);
-    }
-  };
+  const renderContent = (category) => {
+    const items = showcaseItems.filter(item => item.club === category);
+    if (items.length === 0) return <p>No events yet for {category}.</p>;
 
-  const renderTileContent = (club) => {
-    const eventsForClub = events.filter(
-      (e) => e.clubName?.toLowerCase() === club.toLowerCase()
-    );
-    const showcaseForClub = showcaseItems.filter(
-      (s) => s.club?.toLowerCase() === club.toLowerCase()
-    );
-
-    return (
-      <>
-        <h4>Events</h4>
-        {eventsForClub.length ? eventsForClub.map((ev, i) => (
-          <div key={i} className="event-card">
-            <strong>{ev.title}</strong> — {new Date(ev.eventDate).toLocaleDateString()}<br />
-            <p>{ev.description}</p>
-            <ul>
-              {ev.registrationLinks.map((link, j) => (
-                <li key={j}><a href={link} target="_blank" rel="noreferrer">{link}</a></li>
-              ))}
-            </ul>
-          </div>
-        )) : <p>No events for this club.</p>}
-
-        <h4 style={{ marginTop: '1rem' }}>Showcase</h4>
-        {showcaseForClub.length ? showcaseForClub.map((item, i) => (
-          <div key={i} className="showcase-card" style={{ marginTop: '0.5rem' }}>
-            <strong>{item.title}</strong><br />
-            {item.imageUrl && (
-              <img src={item.imageUrl} alt={item.title} style={{ maxWidth: '100%', maxHeight: '200px', marginTop: '0.5rem' }} />
-            )}
-            <p>{item.description}</p>
-            {item.linkUrl && <a href={item.linkUrl} target="_blank" rel="noreferrer">🔗 Link</a>}
-          </div>
-        )) : <p>No showcase items.</p>}
-      </>
-    );
+    return items.map((item, i) => (
+      <div key={i} className="showcase-item">
+        <h3>{item.title}</h3>
+        <p>{item.description}</p>
+        {item.imageUrl && <img src={item.imageUrl} alt={item.title} style={{ width: '100%', maxHeight: '200px', objectFit: 'cover' }} />}
+        {item.linkUrl && <a href={item.linkUrl} target="_blank" rel="noopener noreferrer">Register Here</a>}
+      </div>
+    ));
   };
 
   return (
     <LayoutWrapper title="Student Dashboard">
-      <LogoutButton />
-      {loading ? (
-        <div className="loader-wrapper">
-          <Loader />
-        </div>
-      ) : (
-        <Dashboard headings={headings} renderContent={renderTileContent} />
-      )}
+      {loading ? <Loader /> : <Dashboard headings={categories} renderContent={renderContent} />}
     </LayoutWrapper>
   );
 }

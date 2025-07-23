@@ -1,49 +1,40 @@
-// backend/routes/studentCoordinator.js
-
 const express = require('express');
-const User = require('../models/User');
-const { authMiddleware } = require('../middleware/auth');       // ✅ from auth.js
-const { requireRole } = require('../middleware/role');          // ✅ from role.js
-
 const router = express.Router();
+const ShowcaseItem = require('../models/ShowcaseItem');
+const { authMiddleware, checkPending } = require('../middleware/auth');
+const { requireRole } = require('../middleware/role');
 
-router.get('/coordinators', authMiddleware, requireRole('admin'), async (req, res) => {
-  const coordinators = await User.find({ role: 'studentCoordinator' });
-  res.json(coordinators);
+// ✅ Upload showcase
+router.post('/showcase', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
+  try {
+    const { club, title, description, imageUrl, linkUrl } = req.body;
+
+    const item = new ShowcaseItem({
+      club,
+      title,
+      description,
+      imageUrl,
+      linkUrl,
+      createdBy: req.user._id
+    });
+
+    await item.save();
+    res.status(201).json({ message: 'Showcase item uploaded', item });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ message: 'Upload failed' });
+  }
 });
 
-// View pending student coordinator registrations
-router.get('/pending', authMiddleware, requireRole('faculty'), async (req, res) => {
-  if (req.user.facultyRole !== 'clubCoordinator') {
-    return res.status(403).json({ message: 'Only Club Coordinators can view requests' });
+// ✅ Get all showcase items (for students)
+router.get('/showcase', authMiddleware, async (req, res) => {
+  try {
+    const items = await ShowcaseItem.find().sort({ createdAt: -1 });
+    res.json(items);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    res.status(500).json({ message: 'Fetch failed' });
   }
-
-  const pendingCoordinators = await User.find({
-    role: 'studentCoordinator',
-    isApproved: null
-  });
-
-  res.json(pendingCoordinators);
-});
-
-// Approve or reject student coordinator
-router.put('/:id/approval', authMiddleware, requireRole('faculty'), async (req, res) => {
-  if (req.user.facultyRole !== 'clubCoordinator') {
-    return res.status(403).json({ message: 'Only Club Coordinators can approve/reject' });
-  }
-
-  const { id } = req.params;
-  const { approve } = req.body;
-
-  const student = await User.findById(id);
-  if (!student || student.role !== 'studentCoordinator') {
-    return res.status(404).json({ message: 'Student Coordinator not found' });
-  }
-
-  student.isApproved = approve;
-  await student.save();
-
-  res.json({ message: `Student Coordinator ${approve ? 'approved' : 'rejected'}` });
 });
 
 module.exports = router;
