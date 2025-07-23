@@ -30,7 +30,11 @@ function AdminDashboard() {
 
   const fetchCoordinators = async () => {
     try {
-      const res = await axios.get(`${API}/api/studentCoordinator/coordinators`);
+      const res = await axios.get(`${API}/api/studentcoordinator/coordinators`, {
+      headers: {
+        Authorization: Bearer `${localStorage.getItem("token")}`,
+      },
+    });
       setCoordinators(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Failed to fetch coordinators:", err);
@@ -41,12 +45,16 @@ function AdminDashboard() {
 
   const fetchPendingFaculty = async () => {
     try {
-      const res = await axios.get(`${API}/api/faculty/pending`);
+      const res = await axios.get(`${API}/api/faculty/pending`, {
+        headers: {
+          Authorization: Bearer `${localStorage.getItem("token")}`,
+        },
+      });
       console.log("✅ Fetched faculty:", res.data);
       setPendingFaculty(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Failed to fetch pending faculty:", err);
-      setPendingFaculty([]); // fallback
+      setPendingFaculty([]);
     }
   };
 
