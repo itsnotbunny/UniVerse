@@ -23,6 +23,17 @@ router.get('/users', getAllUsers);
 // ✅ Get approved student coordinators grouped by club
 router.get('/coordinators', getCoordinatorsByClub);
 
+// GET /api/admin/faculty
+router.get('/faculty', requireRole(['admin']), async (req, res) => {
+  try {
+    const faculty = await User.find({ role: 'faculty', isApproved: true });
+    res.json(faculty);
+  } catch (err) {
+    console.error("Error fetching faculty:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // ✅ Approve a faculty registration request
 router.put('/approve-faculty/:id', async (req, res) => {
   try {

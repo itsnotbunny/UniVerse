@@ -122,7 +122,7 @@ function AdminDashboard() {
       return (
         <ul>
           {coordinators.map((c, i) => (
-            <li key={i}>{c.name} — {c.club}</li>
+            <li key={i}>{c.name} — {c.club || ''}</li>
           ))}
         </ul>
       );
@@ -130,45 +130,61 @@ function AdminDashboard() {
 
     if (heading === 'All Faculty') {
       return (
-        <ul>
-          {faculty.map((f, i) => (
-            <li key={i}>
-              {f.name} — {f.email} {f.facultyRole ? (`${f.facultyRole}`) : ''}
-            </li>
-          ))}
-        </ul>
+        <table className="dashboard-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Faculty Role</th>
+              <th>Online</th>
+            </tr>
+          </thead>
+          <tbody>
+            {faculty.map((f, i) => (
+              <tr key={i}>
+                <td>{f.name}</td>
+                <td>{f.email}</td>
+                <td>{f.facultyRole || 'N/A'}</td>
+                <td>{f.isOnline ? '🟢' : '⚫'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       );
     }
 
     if (heading === 'User Database') {
-      const grouped = allUsers.reduce((acc, user) => {
-        const role = user.role || 'unknown';
-        if (!acc[role]) acc[role] = [];
-        acc[role].push(user);
-        return acc;
-      }, {});
+      const grouped = {
+        admin: [],
+        faculty: [],
+        studentCoordinator: [],
+      };
+
+      [...coordinators, ...pendingFaculty].forEach((u) => {
+        grouped[u.role]?.push(u);
+      });
 
       return (
         <div>
-          {Object.entries(grouped).map(([role, users]) => (
-            <div key={role} style={{ marginBottom: "2rem" }}>
-              <h4>{role.charAt(0).toUpperCase() + role.slice(1)}s</h4>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          {['admin', 'faculty', 'studentCoordinator'].map((role) => (
+            <div key={role} style={{ marginBottom: '1rem' }}>
+              <h4 style={{ color: 'gold', marginBottom: '0.5rem' }}>
+                {role === 'admin' ? 'Admins' : role === 'faculty' ? 'Facultys' : 'Student Coordinators'}
+              </h4>
+              <table className="dashboard-table">
                 <thead>
                   <tr>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Club</th>
-                    <th>Approved?</th>
+                    {role !== 'admin' && <th>Club</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u, i) => (
+                  {grouped[role].map((u, i) => (
                     <tr key={i}>
                       <td>{u.name}</td>
                       <td>{u.email}</td>
-                      <td>{u.club || '-'}</td>
-                      <td>{u.isApproved === true ? "✅" : u.isApproved === false ? "❌" : "⏳"}</td>
+                      {role !== 'admin' && <td>{u.club || '—'}</td>}
                     </tr>
                   ))}
                 </tbody>
@@ -187,11 +203,13 @@ function AdminDashboard() {
               {f.name} — {f.email}
               <div style={{ marginTop: "0.5rem" }}>
                 <button onClick={() => handleActionClick(f, "approve")}
-                  style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px" }}
-                >Approve</button>
+                  style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px" }}>
+                  Approve
+                </button>
                 <button onClick={() => handleActionClick(f, "reject")}
-                  style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem" }}
-                >Reject</button>
+                  style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem" }}>
+                  Reject
+                </button>
               </div>
             </li>
           ))}
