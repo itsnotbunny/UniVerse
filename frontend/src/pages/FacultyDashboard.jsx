@@ -105,7 +105,7 @@ function FacultyDashboard() {
 
   const approveCoordinator = async (userId) => {
     try {
-      await axios.put(`${API}/api/admin/assign-role/${userId}`, {
+      await axios.put(`${API}/api/faculty/approve-coordinator/${userId}`, {
         role: 'studentCoordinator'
       }, { headers: { Authorization: `Bearer ${token}` } });
       fetchData();
@@ -127,7 +127,9 @@ function FacultyDashboard() {
 
   const renderTileContent = (heading) => {
     if (heading === 'Coordinator Approval') {
-      const pending = users.filter(u => u.role === 'pending' && u.desiredRole === 'studentCoordinator');
+      const pending = users.filter(u => u.desiredRole === 'studentCoordinator' &&
+        (u.isApproved === null || u.isApproved === false)
+      );
       return pending.length ? pending.map((u, i) => (
         <div key={i}>
           <strong>{u.name}</strong> — {u.email}

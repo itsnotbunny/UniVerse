@@ -52,7 +52,7 @@ function RegisterPage() {
             </select>
 
             {role && (
-              <div className="google-button">
+              <div className="google-btn-wrapper">
                 <GoogleLogin
                   onSuccess={handleGoogleRegister}
                   onError={() => setError("Google sign-in failed")}

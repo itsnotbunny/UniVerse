@@ -82,7 +82,7 @@ const googleLogin = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (!user.role || !user.isApproved) {
+    if (!user.role || user.isApproved === false) {
       console.log("🚫 User not approved or missing role:", user);
       return res.status(403).json({ message: "User not approved or missing role" });
     }
