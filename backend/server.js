@@ -1,3 +1,49 @@
+// Check for problematic routes (run this temporarily to debug)
+// Add this to the top of your server.js temporarily, then remove it
+
+const originalUse = require('express').Router.prototype.use;
+const originalGet = require('express').Router.prototype.get;
+const originalPost = require('express').Router.prototype.post;
+const originalPut = require('express').Router.prototype.put;
+const originalDelete = require('express').Router.prototype.delete;
+
+function logRoute(method, path) {
+  console.log(`📍 Registering ${method} route: ${path}`);
+  
+  // Check for problematic patterns
+  if (typeof path === 'string') {
+    if (path.includes('::') || path.match(/:[^a-zA-Z_]/)) {
+      console.warn(`⚠️  Potentially problematic route pattern: ${path}`);
+    }
+  }
+}
+
+require('express').Router.prototype.use = function(...args) {
+  if (typeof args[0] === 'string') logRoute('USE', args[0]);
+  return originalUse.apply(this, args);
+};
+
+require('express').Router.prototype.get = function(...args) {
+  if (typeof args[0] === 'string') logRoute('GET', args[0]);
+  return originalGet.apply(this, args);
+};
+
+require('express').Router.prototype.post = function(...args) {
+  if (typeof args[0] === 'string') logRoute('POST', args[0]);
+  return originalPost.apply(this, args);
+};
+
+require('express').Router.prototype.put = function(...args) {
+  if (typeof args[0] === 'string') logRoute('PUT', args[0]);
+  return originalPut.apply(this, args);
+};
+
+require('express').Router.prototype.delete = function(...args) {
+  if (typeof args[0] === 'string') logRoute('DELETE', args[0]);
+  return originalDelete.apply(this, args);
+};
+
+
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -7,24 +53,27 @@ const cors = require('cors');
 
 const allowedOrigins = [
   'https://uni-verse-portal.vercel.app',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'http://localhost:3000'
 ];
 
 // ✅ Enhanced CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, postman)
+    // Allow requests with no origin (like mobile apps, curl, postman, extensions)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Log the blocked origin for debugging
+      console.log('❌ CORS blocked origin:', origin);
+      callback(null, true); // Temporarily allow all origins to debug
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   optionsSuccessStatus: 200 // For legacy browser support
 }));
 
