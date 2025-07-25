@@ -1,48 +1,76 @@
-/* src/components/Tile.css */
+/* Improved Tile.css - Fixed Scaling and Responsiveness */
+
+/* CSS Custom Properties for consistent scaling */
+:root {
+  --tile-padding: clamp(1rem, 3vw, 1.5rem);
+  --tile-border-radius: clamp(8px, 1.5vw, 12px);
+  --tile-min-height: clamp(150px, 25vw, 200px);
+  --font-size-sm: clamp(0.875rem, 1.5vw, 0.95rem);
+  --font-size-base: clamp(1rem, 2vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 2.5vw, 1.25rem);
+  --gap-sm: clamp(0.5rem, 1vw, 0.75rem);
+  --gap-base: clamp(0.75rem, 1.5vw, 1rem);
+  --gap-lg: clamp(1rem, 2vw, 1.25rem);
+}
+
+/* Main tile styling */
 .tile {
   background-color: #2d2d2d;
   color: #ffffff;
-  border: 2px solid transparent; /* Invisible border by default */
-  border-radius: 12px;
-  padding: 1.5rem;
+  border: 2px solid transparent;
+  border-radius: var(--tile-border-radius);
+  padding: var(--tile-padding);
   transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  min-height: var(--tile-min-height);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tile:hover {
-  border-color: #4ade80; /* Green border on hover */
+  border-color: #4ade80;
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(74, 222, 128, 0.15);
 }
 
-.tile h3 {
-  margin: 0 0 0.75rem 0;
-  color: #fbbf24; /* Golden yellow for titles */
-  font-size: 1.25rem;
+.tile h3,
+.tile-title {
+  margin: 0 0 var(--gap-sm) 0;
+  color: #fbbf24;
+  font-size: var(--font-size-lg);
   font-weight: 600;
+  line-height: 1.3;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 .tile-content {
-  margin-top: 0.75rem;
-  font-size: 0.95rem;
+  margin-top: var(--gap-sm);
+  font-size: var(--font-size-sm);
   color: #d1d5db;
   line-height: 1.5;
+  flex-grow: 1;
+  overflow-wrap: break-word;
 }
 
 /* Textarea styling */
 .tile-textarea {
   width: 100%;
-  height: 100px;
-  padding: 0.75rem;
-  border-radius: 8px;
+  min-height: clamp(80px, 15vw, 100px);
+  padding: var(--gap-sm);
+  border-radius: var(--tile-border-radius);
   border: 1px solid #4b5563;
   background: #374151;
   color: #ffffff;
   font-family: inherit;
+  font-size: var(--font-size-sm);
   resize: vertical;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
 }
 
 .tile-textarea:focus {
@@ -52,13 +80,17 @@
 
 /* List styling */
 .tile-list {
-  padding-left: 1.25rem;
+  padding-left: var(--gap-lg);
   margin: 0;
+  list-style-type: disc;
 }
 
 .tile-list li {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--gap-sm);
   color: #d1d5db;
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+  word-wrap: break-word;
 }
 
 /* Button styling */
@@ -66,16 +98,21 @@
   background: #4ade80;
   color: #1f2937;
   border: none;
-  padding: 0.5rem 1rem;
-  margin-top: 1rem;
-  border-radius: 6px;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+  margin-top: var(--gap-base);
+  border-radius: var(--tile-border-radius);
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 200px;
+  align-self: center;
 }
 
 .tile-expand-btn:hover {
   background: #22c55e;
+  transform: translateY(-1px);
 }
 
 /* Popup styling */
@@ -90,15 +127,19 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: var(--tile-padding);
+  box-sizing: border-box;
 }
 
 .tile-popup-content {
   background: #2d2d2d;
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
   border: 2px solid #4ade80;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
+  border-radius: var(--tile-border-radius);
+  width: 100%;
+  max-width: min(500px, 90vw);
+  max-height: 80vh;
+  overflow-y: auto;
   color: #ffffff;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -107,23 +148,37 @@
 .tile-popup-content h4 {
   color: #fbbf24;
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: var(--gap-base);
+  font-size: var(--font-size-lg);
+  line-height: 1.3;
+  word-wrap: break-word;
+}
+
+.tile-popup-content p {
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: #d1d5db;
+  margin-bottom: var(--gap-base);
+  word-wrap: break-word;
 }
 
 .tile-popup-actions {
-  margin-top: 1.5rem;
+  margin-top: clamp(1rem, 3vw, 1.5rem);
   display: flex;
-  gap: 0.75rem;
+  gap: var(--gap-sm);
   flex-wrap: wrap;
 }
 
 .tile-btn {
-  padding: 0.5rem 1rem;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--tile-border-radius);
   cursor: pointer;
   font-weight: 500;
+  font-size: var(--font-size-sm);
   transition: all 0.2s ease;
+  flex: 1;
+  min-width: fit-content;
 }
 
 .tile-btn-approve {
@@ -133,6 +188,7 @@
 
 .tile-btn-approve:hover {
   background-color: #059669;
+  transform: translateY(-1px);
 }
 
 .tile-btn-reject {
@@ -142,6 +198,7 @@
 
 .tile-btn-reject:hover {
   background-color: #dc2626;
+  transform: translateY(-1px);
 }
 
 .tile-btn-suggestedits {
@@ -151,27 +208,270 @@
 
 .tile-btn-suggestedits:hover {
   background-color: #d97706;
+  transform: translateY(-1px);
 }
 
 .tile-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 1.5rem;
+  top: var(--gap-base);
+  right: var(--gap-base);
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
   background: none;
   color: #9ca3af;
   border: none;
   cursor: pointer;
-  width: 2rem;
-  height: 2rem;
+  width: clamp(2rem, 4vw, 2.5rem);
+  height: clamp(2rem, 4vw, 2.5rem);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .tile-close:hover {
   background: #374151;
   color: #ffffff;
+}
+
+/* Form elements within tiles */
+.tile input[type="text"],
+.tile input[type="email"],
+.tile input[type="url"] {
+  width: 100%;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem);
+  margin-bottom: var(--gap-sm);
+  border: 1px solid #4b5563;
+  border-radius: var(--tile-border-radius);
+  background: #374151;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.tile input[type="text"]:focus,
+.tile input[type="email"]:focus,
+.tile input[type="url"]:focus,
+.tile textarea:focus {
+  outline: none;
+  border-color: #4ade80;
+}
+
+.tile textarea {
+  width: 100%;
+  min-height: clamp(80px, 15vw, 120px);
+  padding: clamp(0.5rem, 1.5vw, 0.75rem);
+  margin-bottom: var(--gap-sm);
+  border: 1px solid #4b5563;
+  border-radius: var(--tile-border-radius);
+  background: #374151;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.tile button[type="submit"] {
+  background: #4ade80;
+  color: #1f2937;
+  border: none;
+  padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1rem);
+  border-radius: var(--tile-border-radius);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: var(--gap-sm);
+}
+
+.tile button[type="submit"]:hover {
+  background: #22c55e;
+  transform: translateY(-1px);
+}
+
+/* Request item styling for dashboard content */
+.request-item {
+  padding: var(--gap-sm);
+  margin-bottom: var(--gap-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--tile-border-radius);
+  border-left: 3px solid #4ade80;
+  transition: all 0.2s ease;
+}
+
+.request-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.request-item strong {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+/* Showcase item styling */
+.showcase-item {
+  margin-bottom: var(--gap-lg);
+  padding: var(--gap-base);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--tile-border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.showcase-item h3 {
+  color: #fbbf24;
+  margin-bottom: var(--gap-sm);
+  font-size: var(--font-size-lg);
+}
+
+.showcase-item p {
+  color: #d1d5db;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  margin-bottom: var(--gap-sm);
+}
+
+.showcase-item img {
+  width: 100%;
+  max-height: clamp(150px, 30vw, 200px);
+  object-fit: cover;
+  border-radius: var(--tile-border-radius);
+  margin: var(--gap-sm) 0;
+}
+
+.showcase-item a {
+  color: #4ade80;
+  font-weight: bold;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+
+.showcase-item a:hover {
+  color: #22c55e;
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  :root {
+    --tile-padding: 1rem;
+    --tile-min-height: 120px;
+  }
+  
+  .tile-popup-content {
+    padding: 1.5rem;
+    max-width: 95vw;
+  }
+  
+  .tile-popup-actions {
+    flex-direction: column;
+  }
+  
+  .tile-btn {
+    width: 100%;
+  }
+  
+  .tile-close {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+  
+  .tile-list {
+    padding-left: 1rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .tile-popup-content {
+    max-width: 80vw;
+  }
+  
+  .tile-popup-actions {
+    gap: 0.75rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tile {
+    background-color: #000;
+    border-color: #fff;
+  }
+  
+  .tile:hover {
+    border-color: #fff;
+    background-color: #333;
+  }
+  
+  .tile h3,
+  .tile-title {
+    color: #fff;
+  }
+  
+  .tile-content,
+  .tile-list li {
+    color: #fff;
+  }
+  
+  .tile-textarea,
+  .tile input {
+    background: #000;
+    border-color: #fff;
+    color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .tile-expand-btn,
+  .tile-btn,
+  .request-item {
+    transition: none;
+  }
+  
+  .tile:hover,
+  .tile-expand-btn:hover,
+  .tile-btn:hover {
+    transform: none;
+  }
+  
+  .request-item:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .tile {
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  
+  .tile h3,
+  .tile-title {
+    color: black;
+  }
+  
+  .tile-content,
+  .tile-list li {
+    color: black;
+  }
+  
+  .tile-popup {
+    display: none;
+  }
+  
+  .tile-expand-btn {
+    display: none;
+  }
 }

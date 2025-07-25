@@ -115,8 +115,8 @@ function FacultyDashboard() {
   const handleCoordinatorAction = async (coordinatorId, approve) => {
     try {
       const url = approve 
-        ? `${API}/api/admin/approve-coordinator/${coordinatorId}`
-        : `${API}/api/admin/users/${coordinatorId}`;
+        ? `${API}/api/faculty/approve-coordinator/${coordinatorId}`
+        : `${API}/api/faculty/users/${coordinatorId}`;
       
       const method = approve ? 'PUT' : 'DELETE';
       
@@ -167,7 +167,7 @@ function FacultyDashboard() {
 
   const getPendingCoordinators = () => {
     return users.filter(user => 
-      user.role === 'studentCoordinator' && user.isApproved === null
+      user.role === 'studentCoordinator' && (user.isApproved === null || user.isApproved === undefined)
     );
   };
 
