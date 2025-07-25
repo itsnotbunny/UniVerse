@@ -7,6 +7,18 @@ const User = require('../models/User');
 const { authMiddleware, isFaculty, checkPending } = require('../middleware/auth');
 const { requireRole } = require('../middleware/role');
 
+// ✅ GET pending student coordinators (for faculty)
+router.get('/pending-coordinators', authMiddleware, requireRole('faculty'), async (req, res) => {
+  try {
+    const pending = await User.find({ role: 'studentCoordinator', isApproved: null });
+    res.json(pending);
+  } catch (err) {
+    console.error("❌ Error fetching pending coordinators:", err);
+    res.status(500).json({ message: 'Failed to fetch pending coordinators' });
+  }
+});
+
+
 // ✅ Approve student coordinator registrations (faculty only)
 router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, async (req, res) => {
   try {
@@ -26,7 +38,7 @@ router.put('/approve-coordinator/:id', authMiddleware, checkPending, isFaculty, 
 });
 
 // ✅ Reject student coordinator registrations (faculty only)
-router.put('/reject-coordinator/:id', authMiddleware, checkPending, isFaculty, async (req, res) => {
+router.delete('/reject-coordinator/:id', authMiddleware, checkPending, isFaculty, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user || user.role !== 'studentCoordinator' || user.isApproved !== null) {
@@ -83,6 +95,18 @@ router.get('/list', authMiddleware, requireRole('studentCoordinator'), async (re
   } catch (err) {
     console.error("❌ Error fetching faculty list:", err);
     res.status(500).json({ message: 'Failed to fetch faculty list' });
+  }
+});
+
+// List all approved coordinators
+router.get('/approved-coordinators', authMiddleware, requireRole('faculty'), async (req, res) => {
+  try {
+    const list = await User.find({ role: 'studentCoordinator', isApproved: true })
+      .select('name email club');
+    res.json(list);
+  } catch (err) {
+    console.error("❌ Error fetching approved coordinators:", err);
+    res.status(500).json({ message: 'Failed to fetch coordinators' });
   }
 });
 

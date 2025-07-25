@@ -22,6 +22,8 @@ function CoordinatorDashboard() {
     imageUrl: '',
     linkUrl: ''
   });
+  const [ideaText, setIdeaText] = useState('');
+  const [orgText, setOrgText] = useState('');
 
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
@@ -91,9 +93,41 @@ function CoordinatorDashboard() {
     }
   };
 
+  const handleIdeaSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/api/ideas`, { text: ideaText }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('✅ Idea submitted');
+      setIdeaText('');
+    } catch (err) {
+      console.error('❌ Idea submit error:', err);
+      alert('Idea submission failed');
+    }
+  };
+
+  const handleOrgSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedEvent?._id) return;
+    try {
+      await axios.put(`${API}/api/events/${selectedEvent._id}/organisation`, {
+        organisingFlow: orgText
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('✅ Organising flow saved!');
+      setOrgText('');
+    } catch (err) {
+      console.error('❌ Org flow save error:', err);
+      alert('Failed to save');
+    }
+  };
+
   const openModal = (event, tile) => {
     setSelectedEvent(event);
     setActiveTile(tile);
+    setOrgText(event.organisingFlow || ''); // preload if editing
     setModalOpen(true);
   };
 
@@ -153,18 +187,30 @@ function CoordinatorDashboard() {
 
       case 'Idea Board':
         return (
-          <textarea
-            placeholder="Write ideas here..."
-            style={{ width: '100%', height: '120px' }}
-          ></textarea>
+          <form onSubmit={handleIdeaSubmit}>
+            <textarea
+              value={ideaText}
+              onChange={(e) => setIdeaText(e.target.value)}
+              placeholder="Write ideas here..."
+              style={{ width: '100%', height: '120px' }}
+            />
+            <button type="submit">Submit Idea</button>
+          </form>
         );
 
       case 'Event Organisation':
-        return (
-          <textarea
-            placeholder="Describe event flow..."
-            style={{ width: '100%', height: '120px' }}
-          ></textarea>
+        return selectedEvent ? (
+          <form onSubmit={handleOrgSubmit}>
+            <textarea
+              value={orgText}
+              onChange={(e) => setOrgText(e.target.value)}
+              placeholder="Describe event flow..."
+              style={{ width: '100%', height: '120px' }}
+            />
+            <button type="submit">Save Flow</button>
+          </form>
+        ) : (
+          <p>Click an event to edit its organising flow</p>
         );
 
       case 'Club Showcase Uploader':

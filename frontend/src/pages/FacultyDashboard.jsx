@@ -4,7 +4,8 @@ import '../components/Dashboard';
 
 function FacultyDashboard() {
   const [events, setEvents] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [approvedCoordinators, setApprovedCoordinators] = useState([]);
+  const [pendingCoordinators, setPendingCoordinators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pending');
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -37,11 +38,11 @@ function FacultyDashboard() {
     setLoading(true);
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      
-      // Fetching events and users with correct endpoints
-      const [eventRes, userRes] = await Promise.all([
+
+      const [eventRes, approvedRes, pendingRes] = await Promise.all([
         fetch(`${API}/api/events`, { headers }),
-        fetch(`${API}/api/admin/users`, { headers }) // Using admin endpoint which should exist
+        fetch(`${API}/api/faculty/approved-coordinators`, { headers }),
+        fetch(`${API}/api/faculty/pending-coordinators`, { headers })
       ]);
 
       if (eventRes.ok) {
@@ -49,9 +50,14 @@ function FacultyDashboard() {
         setEvents(eventsData);
       }
 
-      if (userRes.ok) {
-        const usersData = await userRes.json();
-        setUsers(usersData);
+      if (approvedRes.ok) {
+        const approvedData = await approvedRes.json();
+        setApprovedCoordinators(approvedData);
+      }
+
+      if (pendingRes.ok) {
+        const pendingData = await pendingRes.json();
+        setPendingCoordinators(pendingData);
       }
 
     } catch (err) {
@@ -116,10 +122,10 @@ function FacultyDashboard() {
     try {
       const url = approve 
         ? `${API}/api/faculty/approve-coordinator/${coordinatorId}`
-        : `${API}/api/faculty/users/${coordinatorId}`;
-      
+        : `${API}/api/faculty/reject-coordinator/${coordinatorId}`;
+
       const method = approve ? 'PUT' : 'DELETE';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -147,9 +153,9 @@ function FacultyDashboard() {
       const facultyApproval = event.facultyApprovals?.find(
         approval => approval.faculty === userInfo._id || approval.faculty?._id === userInfo._id
       );
-      
+
       if (!facultyApproval) return filter === 'pending';
-      
+
       switch (filter) {
         case 'pending':
           return facultyApproval.approved === null;
@@ -163,18 +169,6 @@ function FacultyDashboard() {
           return false;
       }
     });
-  };
-
-  const getPendingCoordinators = () => {
-    return users.filter(user => 
-      user.role === 'studentCoordinator' && (user.isApproved === null || user.isApproved === undefined)
-    );
-  };
-
-  const getApprovedCoordinators = () => {
-    return users.filter(user => 
-      user.role === 'studentCoordinator' && user.isApproved === true
-    );
   };
 
   const renderEventCard = (event) => (
@@ -251,53 +245,36 @@ function FacultyDashboard() {
       case 'pending':
       case 'approved':
       case 'rejected':
-      case 'suggested': {
+      case 'suggested':
         const filteredEvents = getFilteredEvents(activeTab);
         return (
           <div className="cards-grid">
-            {filteredEvents.length > 0 ? (
-              filteredEvents.map(renderEventCard)
-            ) : (
-              <div className="empty-state">
-                <h3>No {activeTab} events</h3>
-                <p>There are currently no events in this category.</p>
-              </div>
-            )}
+            {filteredEvents.length > 0
+              ? filteredEvents.map(renderEventCard)
+              : <p className="empty-state">No {activeTab} events</p>}
           </div>
         );
-      }
-      case 'coordinators': {
-        const coordinators = getApprovedCoordinators();
+
+      case 'coordinators':
         return (
           <div className="cards-grid">
-            {coordinators.length > 0 ? (
-              coordinators.map(renderCoordinatorCard)
-            ) : (
-              <div className="empty-state">
-                <h3>No Coordinators</h3>
-                <p>No approved coordinators found.</p>
-              </div>
-            )}
+            {approvedCoordinators.length > 0
+              ? approvedCoordinators.map(renderCoordinatorCard)
+              : <p className="empty-state">No approved coordinators</p>}
           </div>
         );
-      }
-      case 'approval': {
-        const pendingCoordinators = getPendingCoordinators();
+
+      case 'approval':
         return (
           <div className="cards-grid">
-            {pendingCoordinators.length > 0 ? (
-              pendingCoordinators.map(renderCoordinatorCard)
-            ) : (
-              <div className="empty-state">
-                <h3>No Pending Approvals</h3>
-                <p>No coordinators waiting for approval.</p>
-              </div>
-            )}
+            {pendingCoordinators.length > 0
+              ? pendingCoordinators.map(renderCoordinatorCard)
+              : <p className="empty-state">No pending coordinator approvals</p>}
           </div>
         );
-      }
+
       default:
-        return <div>Invalid tab</div>;
+        return <p>Invalid tab</p>;
     }
   };
 
@@ -316,9 +293,7 @@ function FacultyDashboard() {
               <h1>Welcome, {userInfo.name}</h1>
               <p className="user-role">Faculty Dashboard</p>
             </div>
-            <button onClick={logout} className="btn-logout">
-              🚪 Logout
-            </button>
+            <button onClick={logout} className="btn-logout">🚪 Logout</button>
           </div>
         </header>
 
@@ -341,106 +316,6 @@ function FacultyDashboard() {
           {renderTabContent()}
         </main>
       </div>
-
-      {/* Event Modal */}
-      {showEventModal && selectedEvent && (
-        <div className="modal-overlay" onClick={() => setShowEventModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{selectedEvent.title}</h2>
-              <button className="modal-close" onClick={() => setShowEventModal(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <div className="event-details">
-                <p><strong>Club:</strong> {selectedEvent.clubName}</p>
-                <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}</p>
-                <p><strong>Description:</strong> {selectedEvent.description}</p>
-              </div>
-              
-              {suggestMode ? (
-                <div className="suggest-mode">
-                  <h3>Suggest Edits</h3>
-                  <textarea
-                    placeholder="Type your suggestions here..."
-                    value={suggestion}
-                    onChange={(e) => setSuggestion(e.target.value)}
-                    className="suggestion-textarea"
-                  />
-                  <div className="modal-actions">
-                    <button className="btn-primary" onClick={handleSuggestEdit}>
-                      Submit Suggestion
-                    </button>
-                    <button className="btn-secondary" onClick={() => setSuggestMode(false)}>
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="event-actions">
-                  <textarea
-                    placeholder="Add a comment (optional)"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    className="comment-textarea"
-                  />
-                  <div className="modal-actions">
-                    <button 
-                      className="btn-approve"
-                      onClick={() => handleEventAction(selectedEvent._id, true, comment)}
-                    >
-                      ✅ Approve
-                    </button>
-                    <button 
-                      className="btn-reject"
-                      onClick={() => handleEventAction(selectedEvent._id, false, comment)}
-                    >
-                      ❌ Reject
-                    </button>
-                    <button 
-                      className="btn-secondary"
-                      onClick={() => setSuggestMode(true)}
-                    >
-                      💡 Suggest Edits
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Coordinator Modal */}
-      {showCoordinatorModal && selectedCoordinator && (
-        <div className="modal-overlay" onClick={() => setShowCoordinatorModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Confirm {modalType === 'approve' ? 'Approval' : 'Rejection'}</h2>
-              <button className="modal-close" onClick={() => setShowCoordinatorModal(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              <p>
-                Are you sure you want to <strong>{modalType}</strong> {' '}
-                <strong>{selectedCoordinator.name}</strong> as Student Coordinator?
-              </p>
-              <div className="modal-actions">
-                <button 
-                  className={modalType === 'approve' ? 'btn-approve' : 'btn-reject'}
-                  onClick={() => handleCoordinatorAction(selectedCoordinator._id, modalType === 'approve')}
-                >
-                  Yes, {modalType === 'approve' ? 'Approve' : 'Reject'}
-                </button>
-                <button 
-                  className="btn-secondary"
-                  onClick={() => setShowCoordinatorModal(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </LayoutWrapper>
   );
 }

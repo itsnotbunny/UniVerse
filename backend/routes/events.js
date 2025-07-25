@@ -8,6 +8,31 @@ const User = require('../models/User');
 const { authMiddleware } = require('../middleware/auth');
 const { requireRole } = require('../middleware/role');
 
+// Faculty: Approve or reject event
+router.put('/:eventId/respond', authMiddleware, requireRole('faculty'), async (req, res) => {
+  const { eventId } = req.params;
+  const { approved, comment } = req.body;
+
+  const event = await EventRequest.findById(eventId);
+  if (!event) return res.status(404).send("Event not found");
+
+  const approval = event.facultyApprovals.find(
+    a => a.faculty.toString() === req.user._id.toString()
+  );
+
+  if (!approval) return res.status(403).send("You are not assigned to this event");
+
+  approval.read = true;
+  approval.approved = approved;
+  approval.comment = comment;
+  approval.respondedAt = new Date();
+
+  await event.save();
+
+  res.send("Event decision recorded");
+});
+
+
 // Student Coordinator: Submit event request
 router.post('/', authMiddleware, requireRole('studentCoordinator'), async (req, res) => {
   const { title, description, clubName, eventDate, facultyIds, isPublic, registrationLinks } = req.body;
