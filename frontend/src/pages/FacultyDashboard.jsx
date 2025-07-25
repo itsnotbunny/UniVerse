@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import LayoutWrapper from '../components/LayoutWrapper';
-import './Dashboard.css';
+import '../components/Dashboard';
 
 function FacultyDashboard() {
   const [events, setEvents] = useState([]);
