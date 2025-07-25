@@ -1,8 +1,8 @@
 import LayoutWrapper from '../components/LayoutWrapper';
 import Dashboard from '../components/Dashboard';
-import LogoutButton from '../components/LogoutButton';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
+import logo from '../assets/UniVerseLogo.jpg';
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -19,6 +19,34 @@ function AdminDashboard() {
 
   const API = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token");
+
+  // Get user info from token or localStorage
+  const getUserInfo = () => {
+    try {
+      const getUserInfo = () => {
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        return userInfo?.name || "Admin User";
+      };
+      if (userInfo) {
+        const parsed = JSON.parse(userInfo);
+        return parsed.name || "Admin User";
+      }
+      // Alternative: decode JWT token
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.name || "Admin User";
+      }
+      return "Admin User";
+    } catch (error) {
+      return "Admin User";
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userInfo");
+    window.location.href = "/";
+  };
 
   const headings = [
     'Dance', 'Music', 'Photography', 'Art',
@@ -155,7 +183,7 @@ function AdminDashboard() {
         <div>
           {['admin', 'faculty', 'studentCoordinator'].map((role) => (
             <div key={role} style={{ marginBottom: '1rem' }}>
-              <h4 style={{ color: 'gold', marginBottom: '0.5rem' }}>
+              <h4 style={{ color: '#fbbf24', marginBottom: '0.5rem' }}>
                 {role === 'admin' ? 'Admins' : role === 'faculty' ? 'Facultys' : 'Student Coordinators'}
               </h4>
               <ul>
@@ -175,15 +203,36 @@ function AdminDashboard() {
       return Array.isArray(pendingFaculty) && pendingFaculty.length > 0 ? (
         <ul>
           {pendingFaculty.map((f, i) => (
-            <li key={i}>
+            <li key={i} style={{ marginBottom: '1rem' }}>
               {f.name} — {f.email}
               <div style={{ marginTop: "0.5rem" }}>
-                <button onClick={() => handleActionClick(f, "approve")}
-                  style={{ backgroundColor: "#28a745", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px" }}>
+                <button 
+                  onClick={() => handleActionClick(f, "approve")}
+                  style={{ 
+                    backgroundColor: "#10b981", 
+                    color: "white", 
+                    padding: "6px 12px", 
+                    border: "none", 
+                    borderRadius: "6px",
+                    marginRight: "0.5rem",
+                    cursor: "pointer",
+                    fontWeight: "500"
+                  }}
+                >
                   Approve
                 </button>
-                <button onClick={() => handleActionClick(f, "reject")}
-                  style={{ backgroundColor: "#dc3545", color: "white", padding: "6px 12px", border: "none", borderRadius: "4px", marginLeft: "1rem" }}>
+                <button 
+                  onClick={() => handleActionClick(f, "reject")}
+                  style={{ 
+                    backgroundColor: "#ef4444", 
+                    color: "white", 
+                    padding: "6px 12px", 
+                    border: "none", 
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontWeight: "500"
+                  }}
+                >
                   Reject
                 </button>
               </div>
@@ -199,8 +248,13 @@ function AdminDashboard() {
   };
 
   return (
-    <LayoutWrapper title="Admin Dashboard">
-      <LogoutButton />
+    <LayoutWrapper 
+      title="Admin Dashboard"
+      showHeader={true}
+      userName={getUserInfo()}
+      onLogout={handleLogout}
+      logo={logo} // Replace with your actual logo path
+    >
       {loading ? (
         <Loader />
       ) : (
@@ -214,8 +268,35 @@ function AdminDashboard() {
             Are you sure you want to {actionType} <strong>{selectedFaculty?.name}</strong>?
           </p>
           <div style={{ marginTop: "1rem" }}>
-            <button onClick={handleConfirmAction}>Yes, Confirm</button>
-            <button onClick={handleCloseModal} style={{ marginLeft: "0.5rem" }}>Cancel</button>
+            <button 
+              onClick={handleConfirmAction}
+              style={{
+                backgroundColor: "#4ade80",
+                color: "#1f2937",
+                padding: "0.5rem 1rem",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "500",
+                cursor: "pointer",
+                marginRight: "0.5rem"
+              }}
+            >
+              Yes, Confirm
+            </button>
+            <button 
+              onClick={handleCloseModal}
+              style={{
+                backgroundColor: "#6b7280",
+                color: "white",
+                padding: "0.5rem 1rem",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "500",
+                cursor: "pointer"
+              }}
+            >
+              Cancel
+            </button>
           </div>
         </Modal>
       )}

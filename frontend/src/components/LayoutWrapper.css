@@ -1,26 +1,42 @@
 /* src/components/LayoutWrapper.css */
 .layout-wrapper {
   min-height: 100vh;
-  background-color: #046C4E; /* Wine background */
+  background-color: #1a1a1a; /* Dark background like flashcards */
   padding: 40px;
   box-sizing: border-box;
   min-width: 100vw;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
+.layout-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  z-index: -1;
+}
 
 .dashboard-title {
-  color: gold;
+  color: #ffffff;
   grid-column: 1 / -1;
-  font-size: 2rem;
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .layout-inner {
@@ -32,10 +48,11 @@
 }
 
 .layout-title {
-  color: gold;
-  font-size: 2rem;
-  margin-bottom: 2rem;
+  color: #ffffff;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
   text-align: center;
+  font-weight: 600;
 }
 
 .layout-center {
@@ -44,4 +61,63 @@
   align-items: center;
   width: 100%;
   height: 100%;
+}
+
+/* Header styling for user info and logout */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #374151;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dashboard-logo {
+  border-radius: 8px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  color: #9ca3af;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.logout-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
 }

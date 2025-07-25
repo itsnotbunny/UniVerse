@@ -1,3 +1,5 @@
+// App.jsx
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -8,12 +10,29 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import RegisterPage from './pages/RegisterPage';
 
 function App() {
+  const API = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    const handleUnload = () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const data = JSON.stringify({ isOnline: false });
+
+      navigator.sendBeacon(
+        `${API}/api/user/online-status`,
+        new Blob([data], { type: 'application/json' })
+      );
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
-
-      <Route path='/register' element={<RegisterPage />} />
-
+      <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/admin"
         element={
@@ -38,10 +57,7 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/student"
-      element = {<StudentDashboard />}
-      />
+      <Route path="/student" element={<StudentDashboard />} />
     </Routes>
   );
 }

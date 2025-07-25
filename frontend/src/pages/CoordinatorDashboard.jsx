@@ -1,3 +1,4 @@
+// pages/CoordinatorDashboard.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import LogoutButton from '../components/LogoutButton';
@@ -5,6 +6,7 @@ import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
 import LayoutWrapper from '../components/LayoutWrapper';
+import logo from '../assets/UniVerseLogo.jpg';
 
 function CoordinatorDashboard() {
   const [events, setEvents] = useState([]);
@@ -23,6 +25,21 @@ function CoordinatorDashboard() {
 
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
+
+  const getUserInfo = () => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      return userInfo?.name || 'Coordinator';
+    } catch {
+      return 'Coordinator';
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userInfo');
+    window.location.href = '/';
+  };
 
   const headings = [
     'Events Sent',
@@ -194,7 +211,13 @@ function CoordinatorDashboard() {
   };
 
   return (
-    <LayoutWrapper title="Coordinator Dashboard">
+    <LayoutWrapper 
+      title="Coordinator Dashboard"
+      showHeader={true}
+      userName={getUserInfo()}
+      onLogout={handleLogout}
+      logo={logo}
+    >
       <LogoutButton />
       {loading ? (
         <Loader />

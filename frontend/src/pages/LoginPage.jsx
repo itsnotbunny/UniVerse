@@ -7,32 +7,44 @@ import LayoutWrapper from '../components/LayoutWrapper';
 function LoginPage() {
   const navigate = useNavigate();
   const API = import.meta.env.VITE_API_BASE_URL; 
-  console.log("API Base URL: ", API);
-  const handleGoogleLoginSuccess = (credentialResponse) => {
+
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
     const credential = credentialResponse.credential;
 
-    fetch(`${API}/api/auth/google-login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Login Response: ", data);
-        if(!data.user) throw new Error("User object missing from response");
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        const role = data.user.role;
-        if (role === 'admin') navigate('/admin');
-        else if (role === 'faculty') navigate('/faculty');
-        else if (role === 'studentCoordinator') navigate('/coordinator');
-        else if (role === 'student') navigate('/student');
-        else navigate('/');
-      })
-      .catch((err) => {
-        console.error("Google login failed:", err);
+    try {
+      const res = await fetch(`${API}/api/auth/google-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
       });
+
+      const data = await res.json();
+      if (!data.user) throw new Error("User object missing from response");
+
+      // Save token and user info
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userInfo', JSON.stringify(data.user));
+
+      // ✅ Set isOnline = true
+      await fetch(`${API}/api/user/online-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${data.token}`
+        },
+        body: JSON.stringify({ isOnline: true })
+      });
+
+      const role = data.user.role;
+      if (role === 'admin') navigate('/admin');
+      else if (role === 'faculty') navigate('/faculty');
+      else if (role === 'studentCoordinator') navigate('/coordinator');
+      else if (role === 'student') navigate('/student');
+      else navigate('/');
+    } catch (err) {
+      console.error("Google login failed:", err);
+      alert("Login failed. Please try again.");
+    }
   };
 
   return (
@@ -45,7 +57,7 @@ function LoginPage() {
               <GoogleLogin
                 onSuccess={handleGoogleLoginSuccess}
                 onError={() => alert("Google login failed")}
-                />
+              />
             </div>
             <button onClick={() => navigate('/register')}>Register</button>
             <button onClick={() => navigate('/student')}>Continue as Student</button>
