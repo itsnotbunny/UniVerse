@@ -13,21 +13,61 @@ function App() {
   const API = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    const handleUnload = () => {
+    const handleUnload = async () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const data = JSON.stringify({ isOnline: false });
+      // ✅ Use fetch with keepalive instead of sendBeacon for authenticated requests
+      try {
+        await fetch(`${API}/api/user/online-status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ isOnline: false }),
+          keepalive: true // This ensures the request completes even if the page unloads
+        });
+      } catch (error) {
+        console.error('Error updating online status:', error);
+        // Fallback to sendBeacon without auth (you'll need to handle this differently on backend)
+        const data = JSON.stringify({ isOnline: false, token });
+        navigator.sendBeacon(
+          `${API}/api/user/online-status-beacon`,
+          new Blob([data], { type: 'application/json' })
+        );
+      }
+    };
 
-      navigator.sendBeacon(
-        `${API}/api/user/online-status`,
-        new Blob([data], { type: 'application/json' })
-      );
+    // ✅ Also handle visibility change for better user experience
+    const handleVisibilityChange = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const isOnline = !document.hidden;
+      
+      try {
+        await fetch(`${API}/api/user/online-status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ isOnline })
+        });
+      } catch (error) {
+        console.error('Error updating online status:', error);
+      }
     };
 
     window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
-  }, []);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [API]);
 
   return (
     <Routes>

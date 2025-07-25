@@ -12,39 +12,80 @@ function LoginPage() {
     const credential = credentialResponse.credential;
 
     try {
+      console.log('🔄 Attempting Google login...');
+      
       const res = await fetch(`${API}/api/auth/google-login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ credential }),
       });
 
+      console.log('📡 Response status:', res.status);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('❌ Login failed:', errorText);
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
+
       const data = await res.json();
-      if (!data.user) throw new Error("User object missing from response");
+      console.log('✅ Login response:', data);
+
+      if (!data.user) {
+        console.error('❌ User object missing from response');
+        throw new Error("User object missing from response");
+      }
 
       // Save token and user info
       localStorage.setItem('token', data.token);
       localStorage.setItem('userInfo', JSON.stringify(data.user));
 
-      // ✅ Set isOnline = true
-      await fetch(`${API}/api/user/online-status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${data.token}`
-        },
-        body: JSON.stringify({ isOnline: true })
-      });
+      // ✅ Set isOnline = true with better error handling
+      try {
+        const onlineRes = await fetch(`${API}/api/user/online-status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${data.token}`,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ isOnline: true })
+        });
 
+        if (!onlineRes.ok) {
+          console.warn('⚠️ Failed to update online status:', onlineRes.status);
+        } else {
+          console.log('✅ Online status updated successfully');
+        }
+      } catch (onlineError) {
+        console.warn('⚠️ Online status update failed:', onlineError);
+        // Don't block login for this
+      }
+
+      // Navigate based on role
       const role = data.user.role;
+      console.log('🔄 Navigating to dashboard for role:', role);
+      
       if (role === 'admin') navigate('/admin');
       else if (role === 'faculty') navigate('/faculty');
       else if (role === 'studentCoordinator') navigate('/coordinator');
       else if (role === 'student') navigate('/student');
-      else navigate('/');
+      else {
+        console.warn('⚠️ Unknown role, navigating to home:', role);
+        navigate('/');
+      }
     } catch (err) {
-      console.error("Google login failed:", err);
-      alert("Login failed. Please try again.");
+      console.error("❌ Google login failed:", err);
+      alert(`Login failed: ${err.message}. Please try again.`);
     }
+  };
+
+  const handleGoogleLoginError = (error) => {
+    console.error("❌ Google OAuth error:", error);
+    alert("Google login failed. Please try again.");
   };
 
   return (
@@ -56,7 +97,9 @@ function LoginPage() {
             <div className="google-btn-wrapper">
               <GoogleLogin
                 onSuccess={handleGoogleLoginSuccess}
-                onError={() => alert("Google login failed")}
+                onError={handleGoogleLoginError}
+                useOneTap={false}
+                auto_select={false}
               />
             </div>
             <button onClick={() => navigate('/register')}>Register</button>
