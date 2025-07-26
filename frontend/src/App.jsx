@@ -8,6 +8,10 @@ import CoordinatorDashboard from './pages/CoordinatorDashboard';
 import StudentDashboard from './pages/StudentDashboard';
 import ProtectedRoute from './routes/ProtectedRoute';
 import RegisterPage from './pages/RegisterPage';
+import GoogleLoginPage from './pages/GoogleLoginPage';
+
+// Inside <Routes>:
+
 
 function App() {
   const API = import.meta.env.VITE_API_BASE_URL;
@@ -38,12 +42,12 @@ function App() {
         );
       }
     };
-
+    
     // ✅ Also handle visibility change for better user experience
     const handleVisibilityChange = async () => {
       const token = localStorage.getItem('token');
       if (!token) return;
-
+      
       const isOnline = !document.hidden;
       
       try {
@@ -59,7 +63,7 @@ function App() {
         console.error('Error updating online status:', error);
       }
     };
-
+    
     window.addEventListener('beforeunload', handleUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
@@ -68,10 +72,11 @@ function App() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [API]);
-
+  
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
+      <Route path="/login/google" element={<GoogleLoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route
         path="/admin"

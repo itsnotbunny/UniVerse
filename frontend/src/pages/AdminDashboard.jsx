@@ -1,5 +1,4 @@
 import LayoutWrapper from '../components/LayoutWrapper';
-import Dashboard from '../components/Dashboard';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
 import logo from '../assets/UniVerseLogo.jpg';
@@ -16,28 +15,31 @@ function AdminDashboard() {
   const [selectedFaculty, setSelectedFaculty] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState("");
+  const [activeTab, setActiveTab] = useState('dance');
 
   const API = import.meta.env.VITE_API_BASE_URL;
   const token = localStorage.getItem("token");
 
-  // Get user info from token or localStorage
+  const tabs = [
+    { id: 'dance', label: 'Dance', icon: '💃' },
+    { id: 'music', label: 'Music', icon: '🎵' },
+    { id: 'photography', label: 'Photography', icon: '📸' },
+    { id: 'art', label: 'Art', icon: '🎨' },
+    { id: 'technical', label: 'Technical', icon: '💻' },
+    { id: 'literary', label: 'Literary', icon: '📚' },
+    { id: 'fashion', label: 'Fashion', icon: '👗' },
+    { id: 'book', label: 'Book', icon: '📖' },
+    { id: 'coordinators', label: 'Coordinators', icon: '👥' },
+    { id: 'faculty', label: 'All Faculty', icon: '👨‍🏫' },
+    { id: 'users', label: 'User Database', icon: '👤' },
+    { id: 'registration', label: 'Faculty Registration', icon: '📝' }
+  ];
+
   const getUserInfo = () => {
     try {
-      const getUserInfo = () => {
-        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-        return userInfo?.name || "Admin User";
-      };
-      if (userInfo) {
-        const parsed = JSON.parse(userInfo);
-        return parsed.name || "Admin User";
-      }
-      // Alternative: decode JWT token
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.name || "Admin User";
-      }
-      return "Admin User";
-    } catch (error) {
+      const info = JSON.parse(localStorage.getItem("userInfo"));
+      return info?.name || "Admin User";
+    } catch {
       return "Admin User";
     }
   };
@@ -48,13 +50,6 @@ function AdminDashboard() {
     window.location.href = "/";
   };
 
-  const headings = [
-    'Dance', 'Music', 'Photography', 'Art',
-    'Technical', 'Literary', 'Fashion', 'Book',
-    'Student Coordinators', 'All Faculty',
-    'User Database', 'Faculty Registration'
-  ];
-
   useEffect(() => {
     fetchCoordinators();
     fetchFaculty();
@@ -64,12 +59,13 @@ function AdminDashboard() {
 
   const fetchCoordinators = async () => {
     try {
-      const res = await axios.get(`${API}/api/studentcoordinator/coordinators`, {
+      const res = await axios.get(`${API}/api/admin/coordinators`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCoordinators(res.data || []);
+      setCoordinators(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch coordinators:", err);
+      setCoordinators([]);
     }
   };
 
@@ -78,9 +74,10 @@ function AdminDashboard() {
       const res = await axios.get(`${API}/api/admin/faculty`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setFaculty(res.data || []);
+      setFaculty(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch faculty:", err);
+      setFaculty([]);
     }
   };
 
@@ -89,9 +86,10 @@ function AdminDashboard() {
       const res = await axios.get(`${API}/api/admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAllUsers(res.data || []);
+      setAllUsers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("❌ Failed to fetch all users:", err);
+      setAllUsers([]);
     }
   };
 
@@ -133,6 +131,7 @@ function AdminDashboard() {
       setSelectedFaculty(null);
       setActionType("");
       fetchPendingFaculty();
+      fetchAllUsers();
     } catch (err) {
       console.error("❌ Action failed:", err);
       alert("Action failed. Please try again.");
@@ -145,158 +144,211 @@ function AdminDashboard() {
     setActionType("");
   };
 
-  const renderTileContent = (heading) => {
-    if (heading === 'Student Coordinators') {
+  const renderCoordinatorCard = (coordinator) => (
+    <div key={coordinator._id} className="dashboard-card">
+      <div className="card-header">
+        <h3>{coordinator.name}</h3>
+        <span className="card-subtitle">{coordinator.club || 'No Club Assigned'}</span>
+      </div>
+      <div className="card-content">
+        <p>Email: {coordinator.email || 'N/A'}</p>
+        <p>Role: Student Coordinator</p>
+      </div>
+    </div>
+  );
+
+  const renderFacultyCard = (facultyMember) => (
+    <div key={facultyMember._id} className="dashboard-card">
+      <div className="card-header">
+        <h3>{facultyMember.name}</h3>
+        <span className="card-subtitle">{facultyMember.facultyRole || 'Faculty'}</span>
+      </div>
+      <div className="card-content">
+        <p>Email: {facultyMember.email || 'N/A'}</p>
+        <p>Status: {facultyMember.isOnline ? '🟢 Online' : '⚫ Offline'}</p>
+      </div>
+    </div>
+  );
+
+  const renderPendingFacultyCard = (facultyMember) => (
+    <div key={facultyMember._id} className="dashboard-card">
+      <div className="card-header">
+        <h3>{facultyMember.name}</h3>
+        <span className="card-subtitle">Pending Approval</span>
+      </div>
+      <div className="card-content">
+        <p>Email: {facultyMember.email || 'N/A'}</p>
+        <p>Role: {facultyMember.facultyRole || 'Faculty'}</p>
+      </div>
+      <div className="card-actions">
+        <button
+          onClick={() => handleActionClick(facultyMember, "approve")}
+          className="btn-approve"
+        >
+          ✅ Approve
+        </button>
+        <button
+          onClick={() => handleActionClick(facultyMember, "reject")}
+          className="btn-reject"
+        >
+          ❌ Reject
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderTabContent = () => {
+    if (loading) {
       return (
-        <ul>
-          {coordinators.map((c, i) => (
-            <li key={i}>{c.name} — {c.club || ''}</li>
-          ))}
-        </ul>
-      );
-    }
-
-    if (heading === 'All Faculty') {
-      return (
-        <ul>
-          {faculty.map((f, i) => (
-            <li key={i}>
-              {f.name} {f.facultyRole ? `— ${f.facultyRole}` : ''}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-
-    if (heading === 'User Database') {
-      const grouped = {
-        admin: [],
-        faculty: [],
-        studentCoordinator: [],
-      };
-
-      [...coordinators, ...pendingFaculty].forEach((u) => {
-        grouped[u.role]?.push(u);
-      });
-
-      return (
-        <div>
-          {['admin', 'faculty', 'studentCoordinator'].map((role) => (
-            <div key={role} style={{ marginBottom: '1rem' }}>
-              <h4 style={{ color: '#fbbf24', marginBottom: '0.5rem' }}>
-                {role === 'admin' ? 'Admins' : role === 'faculty' ? 'Facultys' : 'Student Coordinators'}
-              </h4>
-              <ul>
-                {grouped[role].map((u, i) => (
-                  <li key={i}>
-                    {u.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading dashboard data...</p>
         </div>
       );
     }
 
-    if (heading === 'Faculty Registration') {
-      return Array.isArray(pendingFaculty) && pendingFaculty.length > 0 ? (
-        <ul>
-          {pendingFaculty.map((f, i) => (
-            <li key={i} style={{ marginBottom: '1rem' }}>
-              {f.name} — {f.email}
-              <div style={{ marginTop: "0.5rem" }}>
-                <button 
-                  onClick={() => handleActionClick(f, "approve")}
-                  style={{ 
-                    backgroundColor: "#10b981", 
-                    color: "white", 
-                    padding: "6px 12px", 
-                    border: "none", 
-                    borderRadius: "6px",
-                    marginRight: "0.5rem",
-                    cursor: "pointer",
-                    fontWeight: "500"
-                  }}
-                >
-                  Approve
-                </button>
-                <button 
-                  onClick={() => handleActionClick(f, "reject")}
-                  style={{ 
-                    backgroundColor: "#ef4444", 
-                    color: "white", 
-                    padding: "6px 12px", 
-                    border: "none", 
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontWeight: "500"
-                  }}
-                >
-                  Reject
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No pending faculty approvals</p>
-      );
-    }
+    switch (activeTab) {
+      case 'coordinators':
+        return (
+          <div className="cards-grid">
+            {Array.isArray(coordinators) && coordinators.length > 0 ? (
+              coordinators.map(renderCoordinatorCard)
+            ) : (
+              <p className="empty-state">No coordinators found</p>
+            )}
+          </div>
+        );
 
-    return <p>Club events or tools for {heading}</p>;
+      case 'faculty':
+        return (
+          <div className="cards-grid">
+            {Array.isArray(faculty) && faculty.length > 0 ? (
+              faculty.map(renderFacultyCard)
+            ) : (
+              <p className="empty-state">No faculty members found</p>
+            )}
+          </div>
+        );
+
+      case 'users':
+        const grouped = {
+          admin: [],
+          faculty: [],
+          studentCoordinator: [],
+        };
+        allUsers.forEach((user) => {
+          if (grouped[user.role]) grouped[user.role].push(user);
+        });
+
+        return (
+          <div className="cards-grid">
+            {['admin', 'faculty', 'studentCoordinator'].map((role) => (
+              <div key={role} className="dashboard-card">
+                <div className="card-header">
+                  <h3>
+                    {role === 'admin'
+                      ? 'Admins'
+                      : role === 'faculty'
+                      ? 'Faculty Members'
+                      : 'Student Coordinators'}
+                  </h3>
+                  <span className="card-subtitle">{grouped[role].length} users</span>
+                </div>
+                <div className="card-content">
+                  {grouped[role].length > 0 ? (
+                    <ul className="user-list">
+                      {grouped[role].map((user, j) => (
+                        <li key={j} className="user-item">
+                          <strong>{user.name}</strong>
+                          {user.email && <span> - {user.email}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>No users in this category</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case 'registration':
+        return (
+          <div className="cards-grid">
+            {Array.isArray(pendingFaculty) && pendingFaculty.length > 0 ? (
+              pendingFaculty.map(renderPendingFacultyCard)
+            ) : (
+              <p className="empty-state">No pending faculty registrations</p>
+            )}
+          </div>
+        );
+
+      default:
+        return (
+          <div className="empty-state">
+            <h3>Club Management - {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
+            <p>Club events and management tools for {activeTab} will be displayed here.</p>
+          </div>
+        );
+    }
   };
 
   return (
-    <LayoutWrapper 
-      title="Admin Dashboard"
-      showHeader={true}
-      userName={getUserInfo()}
-      onLogout={handleLogout}
-      logo={logo} // Replace with your actual logo path
-    >
-      {loading ? (
-        <Loader />
-      ) : (
-        <Dashboard headings={headings} renderContent={renderTileContent} />
-      )}
+    <LayoutWrapper title="Admin Dashboard">
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <div className="header-content">
+            <div className="user-info">
+              <h1>Welcome, {getUserInfo()}</h1>
+              <p className="user-role">Admin Dashboard</p>
+            </div>
+            <button onClick={handleLogout} className="btn-logout">🚪 Logout</button>
+          </div>
+        </header>
+
+        <nav className="dashboard-nav">
+          <div className="nav-tabs">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="tab-icon">{tab.icon}</span>
+                <span className="tab-label">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        <main className="dashboard-main">
+          {renderTabContent()}
+        </main>
+      </div>
 
       {showModal && (
         <Modal isOpen={showModal} onClose={handleCloseModal}>
-          <h3>Confirm {actionType === "approve" ? "Approval" : "Rejection"}</h3>
-          <p>
-            Are you sure you want to {actionType} <strong>{selectedFaculty?.name}</strong>?
-          </p>
-          <div style={{ marginTop: "1rem" }}>
-            <button 
-              onClick={handleConfirmAction}
-              style={{
-                backgroundColor: "#4ade80",
-                color: "#1f2937",
-                padding: "0.5rem 1rem",
-                border: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-                cursor: "pointer",
-                marginRight: "0.5rem"
-              }}
-            >
-              Yes, Confirm
-            </button>
-            <button 
-              onClick={handleCloseModal}
-              style={{
-                backgroundColor: "#6b7280",
-                color: "white",
-                padding: "0.5rem 1rem",
-                border: "none",
-                borderRadius: "6px",
-                fontWeight: "500",
-                cursor: "pointer"
-              }}
-            >
-              Cancel
-            </button>
+          <div className="modal-content">
+            <h3>Confirm {actionType === "approve" ? "Approval" : "Rejection"}</h3>
+            <p>
+              Are you sure you want to <strong>{actionType}</strong> faculty member:{" "}
+              <strong>{selectedFaculty?.name}</strong>?
+            </p>
+            <div className="modal-actions">
+              <button
+                onClick={handleConfirmAction}
+                className="btn-primary"
+              >
+                Yes, Confirm
+              </button>
+              <button
+                onClick={handleCloseModal}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </Modal>
       )}

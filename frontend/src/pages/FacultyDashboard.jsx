@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import LayoutWrapper from '../components/LayoutWrapper';
 import '../components/Dashboard';
+import Modal from '../components/Modal';
+
 
 function FacultyDashboard() {
   const [events, setEvents] = useState([]);
@@ -316,6 +318,46 @@ function FacultyDashboard() {
           {renderTabContent()}
         </main>
       </div>
+      {showCoordinatorModal && selectedCoordinator && (
+        <Modal isOpen={showCoordinatorModal} onClose={() => setShowCoordinatorModal(false)}>
+          <h3>Confirm {modalType === "approve" ? "Approval" : "Rejection"}</h3>
+          <p>
+            Are you sure you want to <strong>{modalType}</strong> coordinator:{" "}
+            <strong>{selectedCoordinator.name}</strong>?
+          </p>
+          <div style={{ marginTop: "1rem" }}>
+            <button
+              onClick={() => handleCoordinatorAction(selectedCoordinator._id, modalType === "approve")}
+              style={{
+                backgroundColor: "#4ade80",
+                color: "#1f2937",
+                padding: "0.5rem 1rem",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "500",
+                cursor: "pointer",
+                marginRight: "0.5rem",
+              }}
+            >
+              Yes, Confirm
+            </button>
+            <button
+              onClick={() => setShowCoordinatorModal(false)}
+              style={{
+                backgroundColor: "#6b7280",
+                color: "white",
+                padding: "0.5rem 1rem",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: "500",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </Modal>
+      )}
     </LayoutWrapper>
   );
 }

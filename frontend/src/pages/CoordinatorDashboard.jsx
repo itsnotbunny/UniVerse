@@ -1,12 +1,7 @@
-// pages/CoordinatorDashboard.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import LogoutButton from '../components/LogoutButton';
-import Dashboard from '../components/Dashboard';
-import Loader from '../components/Loader';
-import Modal from '../components/Modal';
 import LayoutWrapper from '../components/LayoutWrapper';
-import logo from '../assets/UniVerseLogo.jpg';
+import Modal from '../components/Modal';
 
 function CoordinatorDashboard() {
   const [events, setEvents] = useState([]);
@@ -14,7 +9,7 @@ function CoordinatorDashboard() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [activeTile, setActiveTile] = useState('');
+  const [activeTab, setActiveTab] = useState('events');
   const [showcase, setShowcase] = useState({
     club: '',
     title: '',
@@ -27,30 +22,16 @@ function CoordinatorDashboard() {
 
   const token = localStorage.getItem('token');
   const API = import.meta.env.VITE_API_BASE_URL;
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 
-  const getUserInfo = () => {
-    try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      return userInfo?.name || 'Coordinator';
-    } catch {
-      return 'Coordinator';
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userInfo');
-    window.location.href = '/';
-  };
-
-  const headings = [
-    'Events Sent',
-    'Idea Board',
-    'Events Status',
-    'Faculty Status',
-    'Faculty List',
-    'Event Organisation',
-    'Club Showcase Uploader'
+  const tabs = [
+    { id: 'events', label: 'Events Sent', icon: '📋' },
+    { id: 'status', label: 'Events Status', icon: '📊' },
+    { id: 'faculty-status', label: 'Faculty Status', icon: '👨‍🏫' },
+    { id: 'faculty-list', label: 'Faculty List', icon: '👥' },
+    { id: 'ideas', label: 'Idea Board', icon: '💡' },
+    { id: 'organisation', label: 'Event Organisation', icon: '🗂️' },
+    { id: 'showcase', label: 'Club Showcase', icon: '🎯' }
   ];
 
   useEffect(() => {
@@ -67,30 +48,16 @@ function CoordinatorDashboard() {
       setEvents(eventRes.data);
       setFaculty(facultyRes.data);
     } catch (err) {
-      console.error('❌ Coordinator fetch error:', err);
+      console.error('❌ Fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleShowcaseSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(`${API}/api/showcase`, showcase, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      alert('✅ Showcase item uploaded!');
-      setShowcase({
-        club: '',
-        title: '',
-        description: '',
-        imageUrl: '',
-        linkUrl: ''
-      });
-    } catch (err) {
-      console.error('❌ Upload error:', err);
-      alert('Upload failed.');
-    }
+  const openModal = (event) => {
+    setSelectedEvent(event);
+    setOrgText(event.organisingFlow || '');
+    setModalOpen(true);
   };
 
   const handleIdeaSubmit = async (e) => {
@@ -103,7 +70,7 @@ function CoordinatorDashboard() {
       setIdeaText('');
     } catch (err) {
       console.error('❌ Idea submit error:', err);
-      alert('Idea submission failed');
+      alert('Submission failed');
     }
   };
 
@@ -116,176 +83,336 @@ function CoordinatorDashboard() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert('✅ Organising flow saved!');
+      alert('✅ Flow saved!');
       setOrgText('');
+      setModalOpen(false);
+      fetchData();
     } catch (err) {
-      console.error('❌ Org flow save error:', err);
-      alert('Failed to save');
+      console.error('❌ Flow save error:', err);
+      alert('Save failed');
     }
   };
 
-  const openModal = (event, tile) => {
-    setSelectedEvent(event);
-    setActiveTile(tile);
-    setOrgText(event.organisingFlow || ''); // preload if editing
-    setModalOpen(true);
+  const handleShowcaseSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/api/showcase`, showcase, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('✅ Showcase uploaded!');
+      setShowcase({ club: '', title: '', description: '', imageUrl: '', linkUrl: '' });
+    } catch (err) {
+      console.error('❌ Upload error:', err);
+      alert('Upload failed');
+    }
   };
 
-  const renderTileContent = (heading) => {
-    switch (heading) {
-      case 'Events Sent':
-        return events.map((e, i) => (
-          <div
-            key={e._id || i}
-            onClick={() => openModal(e, heading)}
-            className="request-item"
-            style={{ cursor: 'pointer' }}
-          >
-            <strong>{e.title}</strong> — {e.clubName}
+  const renderEventCard = (event) => (
+    <div key={event._id} className="dashboard-card" onClick={() => openModal(event)}>
+      <div className="card-header">
+        <h3>{event.title}</h3>
+        <span className="club-name">{event.clubName}</span>
+      </div>
+      <div className="card-content">
+        <p className="event-date">📅 {new Date(event.date).toLocaleDateString()}</p>
+        <p className="event-description">{event.description?.substring(0, 100)}...</p>
+      </div>
+      <div className="card-footer">
+        <span className="event-status">Status: {event.status}</span>
+      </div>
+    </div>
+  );
+
+  const renderStatusCard = (event) => {
+    const approved = event.facultyApprovals.filter(a => a.approved === true).length;
+    const rejected = event.facultyApprovals.filter(a => a.approved === false).length;
+    const pending = event.facultyApprovals.filter(a => a.approved === null).length;
+
+    return (
+      <div key={event._id} className="dashboard-card" onClick={() => openModal(event)}>
+        <div className="card-header">
+          <h3>{event.title}</h3>
+          <span className="club-name">{event.clubName}</span>
+        </div>
+        <div className="card-content">
+          <p className="event-status">Status: <strong>{event.status}</strong></p>
+          <div className="approval-stats">
+            <span className="approved">✅ {approved}</span>
+            <span className="rejected">❌ {rejected}</span>
+            <span className="pending">⏳ {pending}</span>
           </div>
-        ));
+        </div>
+      </div>
+    );
+  };
 
-      case 'Events Status':
-        return events.map((e, i) => {
-          const approved = e.facultyApprovals.filter(a => a.approved === true).length;
-          const rejected = e.facultyApprovals.filter(a => a.approved === false).length;
-          const pending = e.facultyApprovals.filter(a => a.approved === null).length;
-
-          return (
-            <div
-              key={e._id || i}
-              onClick={() => openModal(e, heading)}
-              className="request-item"
-              style={{ cursor: 'pointer' }}
-            >
-              <strong>{e.title}</strong> — Status: <em>{e.status}</em><br />
-              ✅ {approved} | ❌ {rejected} | ⏳ {pending}
+  const renderFacultyStatusCard = (event) => (
+    <div key={event._id} className="dashboard-card">
+      <div className="card-header">
+        <h3>{event.title}</h3>
+        <span className="club-name">{event.clubName}</span>
+      </div>
+      <div className="card-content">
+        <div className="faculty-approvals">
+          {event.facultyApprovals.map((fa, i) => (
+            <div key={i} className="approval-item">
+              <span>Faculty ID: {fa.faculty}</span>
+              <span className={`status ${fa.read ? 'read' : 'unread'}`}>
+                {fa.read ? '🟢 Seen' : '⚫ Not Seen'}
+              </span>
             </div>
-          );
-        });
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
-      case 'Faculty Status':
-        return events.map((e, i) => (
-          <div key={e._id || i}>
-            <strong>{e.title}</strong>
-            <ul>
-              {e.facultyApprovals.map((fa, j) => (
-                <li key={j}>
-                  Faculty ID: {fa.faculty} — {fa.read ? 'Seen' : 'Not Seen'}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ));
+  const renderFacultyCard = (facultyMember) => (
+    <div key={facultyMember._id} className="dashboard-card">
+      <div className="card-header">
+        <h3>{facultyMember.name}</h3>
+        <span className="faculty-role">{facultyMember.facultyRole}</span>
+      </div>
+      <div className="card-content">
+        <div className="online-status">
+          <span className={`status ${facultyMember.isOnline ? 'online' : 'offline'}`}>
+            {facultyMember.isOnline ? '🟢 Online' : '⚫ Offline'}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 
-      case 'Faculty List':
-        return faculty.map((f, i) => (
-          <div key={i}>
-            {f.name} ({f.facultyRole}) — {f.isOnline ? '🟢 Online' : '⚫ Offline'}
-          </div>
-        ));
+  const renderTabContent = () => {
+    if (loading) {
+      return (
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Loading dashboard data...</p>
+        </div>
+      );
+    }
 
-      case 'Idea Board':
+    switch (activeTab) {
+      case 'events':
         return (
-          <form onSubmit={handleIdeaSubmit}>
-            <textarea
-              value={ideaText}
-              onChange={(e) => setIdeaText(e.target.value)}
-              placeholder="Write ideas here..."
-              style={{ width: '100%', height: '120px' }}
-            />
-            <button type="submit">Submit Idea</button>
-          </form>
+          <div className="cards-grid">
+            {events.length > 0
+              ? events.map(renderEventCard)
+              : <p className="empty-state">No events sent</p>}
+          </div>
         );
 
-      case 'Event Organisation':
-        return selectedEvent ? (
-          <form onSubmit={handleOrgSubmit}>
-            <textarea
-              value={orgText}
-              onChange={(e) => setOrgText(e.target.value)}
-              placeholder="Describe event flow..."
-              style={{ width: '100%', height: '120px' }}
-            />
-            <button type="submit">Save Flow</button>
-          </form>
-        ) : (
-          <p>Click an event to edit its organising flow</p>
+      case 'status':
+        return (
+          <div className="cards-grid">
+            {events.length > 0
+              ? events.map(renderStatusCard)
+              : <p className="empty-state">No events to show status</p>}
+          </div>
         );
 
-      case 'Club Showcase Uploader':
+      case 'faculty-status':
         return (
-          <form onSubmit={handleShowcaseSubmit}>
-            <input
-              type="text"
-              value={showcase.club}
-              onChange={(e) => setShowcase({ ...showcase, club: e.target.value })}
-              placeholder="Club"
-              required
-            />
-            <input
-              type="text"
-              value={showcase.title}
-              onChange={(e) => setShowcase({ ...showcase, title: e.target.value })}
-              placeholder="Title"
-              required
-            />
-            <input
-              type="text"
-              value={showcase.imageUrl}
-              onChange={(e) => setShowcase({ ...showcase, imageUrl: e.target.value })}
-              placeholder="Image URL"
-            />
-            <input
-              type="text"
-              value={showcase.linkUrl}
-              onChange={(e) => setShowcase({ ...showcase, linkUrl: e.target.value })}
-              placeholder="Registration Link"
-            />
-            <textarea
-              value={showcase.description}
-              onChange={(e) => setShowcase({ ...showcase, description: e.target.value })}
-              placeholder="Description"
-            ></textarea>
-            <button type="submit">Upload</button>
-          </form>
+          <div className="cards-grid">
+            {events.length > 0
+              ? events.map(renderFacultyStatusCard)
+              : <p className="empty-state">No faculty status to display</p>}
+          </div>
+        );
+
+      case 'faculty-list':
+        return (
+          <div className="cards-grid">
+            {faculty.length > 0
+              ? faculty.map(renderFacultyCard)
+              : <p className="empty-state">No faculty members found</p>}
+          </div>
+        );
+
+      case 'ideas':
+        return (
+          <div className="form-container">
+            <div className="form-card">
+              <h3>Share Your Ideas</h3>
+              <form onSubmit={handleIdeaSubmit}>
+                <textarea
+                  value={ideaText}
+                  onChange={(e) => setIdeaText(e.target.value)}
+                  placeholder="Share your ideas for events, improvements, or suggestions..."
+                  className="form-textarea"
+                  rows="6"
+                  required
+                />
+                <button type="submit" className="btn-primary">Submit Idea</button>
+              </form>
+            </div>
+          </div>
+        );
+
+      case 'organisation':
+        return (
+          <div className="form-container">
+            <div className="form-card">
+              <h3>Event Organisation</h3>
+              {selectedEvent ? (
+                <form onSubmit={handleOrgSubmit}>
+                  <div className="selected-event-info">
+                    <h4>Editing: {selectedEvent.title}</h4>
+                    <p>{selectedEvent.clubName}</p>
+                  </div>
+                  <textarea
+                    value={orgText}
+                    onChange={(e) => setOrgText(e.target.value)}
+                    placeholder="Describe the event organization flow, timeline, responsibilities..."
+                    className="form-textarea"
+                    rows="8"
+                    required
+                  />
+                  <div className="form-actions">
+                    <button type="submit" className="btn-primary">Save Flow</button>
+                    <button 
+                      type="button" 
+                      onClick={() => setSelectedEvent(null)}
+                      className="btn-secondary"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <p className="instruction-text">Click on an event from the "Events Sent" tab to edit its organizing flow</p>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'showcase':
+        return (
+          <div className="form-container">
+            <div className="form-card">
+              <h3>Club Showcase Uploader</h3>
+              <form onSubmit={handleShowcaseSubmit} className="showcase-form">
+                <div className="form-row">
+                  <input
+                    type="text"
+                    value={showcase.club}
+                    onChange={(e) => setShowcase({ ...showcase, club: e.target.value })}
+                    placeholder="Club Name"
+                    className="form-input"
+                    required
+                  />
+                  <input
+                    type="text"
+                    value={showcase.title}
+                    onChange={(e) => setShowcase({ ...showcase, title: e.target.value })}
+                    placeholder="Event/Showcase Title"
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="form-row">
+                  <input
+                    type="url"
+                    value={showcase.imageUrl}
+                    onChange={(e) => setShowcase({ ...showcase, imageUrl: e.target.value })}
+                    placeholder="Image URL"
+                    className="form-input"
+                  />
+                  <input
+                    type="url"
+                    value={showcase.linkUrl}
+                    onChange={(e) => setShowcase({ ...showcase, linkUrl: e.target.value })}
+                    placeholder="Registration/Event Link"
+                    className="form-input"
+                  />
+                </div>
+                <textarea
+                  value={showcase.description}
+                  onChange={(e) => setShowcase({ ...showcase, description: e.target.value })}
+                  placeholder="Describe your club showcase, event details, what makes it special..."
+                  className="form-textarea"
+                  rows="5"
+                  required
+                />
+                <button type="submit" className="btn-primary">Upload Showcase</button>
+              </form>
+            </div>
+          </div>
         );
 
       default:
-        return <p>Coming soon...</p>;
+        return <p className="empty-state">Select a tab to view content</p>;
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userInfo");
+    window.location.href = "/";
+  };
+
   return (
-    <LayoutWrapper 
-      title="Coordinator Dashboard"
-      showHeader={true}
-      userName={getUserInfo()}
-      onLogout={handleLogout}
-      logo={logo}
-    >
-      <LogoutButton />
-      {loading ? (
-        <Loader />
-      ) : (
-        <Dashboard headings={headings} renderContent={renderTileContent} />
-      )}
+    <LayoutWrapper title="Coordinator Dashboard">
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <div className="header-content">
+            <div className="user-info">
+              <h1>Welcome, {userInfo.name}</h1>
+              <p className="user-role">Coordinator Dashboard</p>
+            </div>
+            <button onClick={handleLogout} className="btn-logout">🚪 Logout</button>
+          </div>
+        </header>
+
+        <nav className="dashboard-nav">
+          <div className="nav-tabs">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="tab-icon">{tab.icon}</span>
+                <span className="tab-label">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        <main className="dashboard-main">
+          {renderTabContent()}
+        </main>
+      </div>
+
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         {selectedEvent && (
-          <div>
+          <div className="modal-content">
             <h2>{selectedEvent.title}</h2>
-            <p>{selectedEvent.description}</p>
-            <hr />
-            <strong>Faculty Feedback:</strong>
-            <ul>
-              {selectedEvent.facultyApprovals.map((f, i) => (
-                <li key={i}>
-                  Faculty ID: {f.faculty}<br />
-                  ✅ Approved: {f.approved === true ? 'Yes' : f.approved === false ? 'No' : 'Pending'}<br />
-                  💬 Comment: {f.comment || 'None'}
-                </li>
-              ))}
-            </ul>
+            <p className="modal-description">{selectedEvent.description}</p>
+            <div className="modal-divider"></div>
+            <div className="faculty-feedback-section">
+              <h3>Faculty Feedback:</h3>
+              <div className="feedback-list">
+                {selectedEvent.facultyApprovals.map((f, i) => (
+                  <div key={i} className="feedback-item">
+                    <div className="feedback-header">
+                      <strong>Faculty ID: {f.faculty}</strong>
+                    </div>
+                    <div className="feedback-details">
+                      <p><strong>Status:</strong> {
+                        f.approved === true ? '✅ Approved' : 
+                        f.approved === false ? '❌ Rejected' : 
+                        '⏳ Pending'
+                      }</p>
+                      {f.comment && (
+                        <p><strong>Comment:</strong> {f.comment}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </Modal>
