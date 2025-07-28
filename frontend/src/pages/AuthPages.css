@@ -18,7 +18,7 @@
 .fullscreen-center {
   min-height: 100vh;
   width: 100%;
-  background-image: url('./assets/background.jpg'); /* Replace with your background image path */
+  background-image: url('./assets/UniVerseLogo.jpg'); /* Replace with your background image path */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
