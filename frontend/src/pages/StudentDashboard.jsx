@@ -23,23 +23,18 @@ function StudentDashboard() {
   ];
 
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const [eventsRes, showcaseRes] = await Promise.all([
-          axios.get(`${API}/api/events/public`),
-          axios.get(`${API}/api/showcase`)
-        ]);
-        setEvents(eventsRes.data || []);
-        setShowcaseItems(showcaseRes.data || []);
-      } catch (err) {
-        console.error('❌ Error fetching student data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const sampleEvents = tabs.map((tab) => ({
+      title: `${tab.label} Auditions 2025`,
+      clubName: tab.label,
+      eventDate: new Date(),
+      description: `Join the ${tab.label} Club auditions to showcase your passion and talent. We're looking for enthusiastic individuals to represent our college in various cultural events!`,
+      registrationLinks: [`https://example.com/register/${tab.id}`]
+    }));
 
-    fetchAll();
-  }, [API]);
+    setEvents(sampleEvents);
+    setShowcaseItems([]); // If needed, add mock showcase data later
+    setLoading(false);
+  }, []);
 
   const renderEventCard = (event, index) => (
     <div key={`event-${index}`} className="dashboard-card">
@@ -71,41 +66,6 @@ function StudentDashboard() {
     </div>
   );
 
-  const renderShowcaseCard = (item, index) => (
-    <div key={`showcase-${index}`} className="dashboard-card">
-      <div className="card-header">
-        <h3>{item.title}</h3>
-        <span className="club-name">{item.club}</span>
-      </div>
-      <div className="card-content">
-        <p className="event-description">{item.description}</p>
-        {item.imageUrl && (
-          <div className="showcase-image">
-            <img
-              src={item.imageUrl}
-              alt={item.title}
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          </div>
-        )}
-        <div className="showcase-actions">
-          {item.linkUrl && (
-            <a
-              href={item.linkUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary"
-            >
-              🔗 Visit Link
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
   const renderTabContent = () => {
     if (loading) {
       return (
@@ -116,10 +76,10 @@ function StudentDashboard() {
       );
     }
 
-    const categoryEvents = events.filter(e => 
+    const categoryEvents = events.filter(e =>
       e.clubName?.toLowerCase() === activeTab.toLowerCase()
     );
-    const categoryShowcase = showcaseItems.filter(s => 
+    const categoryShowcase = showcaseItems.filter(s =>
       s.club?.toLowerCase() === activeTab.toLowerCase()
     );
 
@@ -138,7 +98,7 @@ function StudentDashboard() {
     return (
       <div className="cards-grid">
         {categoryEvents.map((event, i) => renderEventCard(event, i))}
-        {categoryShowcase.map((item, i) => renderShowcaseCard(item, i))}
+        {/* You can add showcase rendering here if needed */}
       </div>
     );
   };
