@@ -2,7 +2,6 @@
 import './AuthPages.css';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import LayoutWrapper from '../components/LayoutWrapper';
 
 function GoogleLoginPage() {
   const navigate = useNavigate();
@@ -59,29 +58,31 @@ function GoogleLoginPage() {
   };
 
   return (
-    <LayoutWrapper title="Google Sign-In" center>
-      <div className="fullscreen-center">
-        <div className="auth-center-wrapper">
-          <div className="auth-page">
-            <div className="auth-form">
-              <h2>Sign in with Google</h2>
+    <>
+      <div className="auth-background"></div>
+      <div className="auth-page-title">Welcome to UniVerse</div>
+      <div className="auth-container">
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div className="auth-card">
+            <h2>Sign in with Google</h2>
+            <div className="google-btn-wrapper">
               <GoogleLogin
                 onSuccess={handleGoogleLoginSuccess}
                 onError={handleGoogleLoginError}
                 useOneTap={false}
                 auto_select={false}
               />
-              <button 
-                className="secondary-button"
-                onClick={() => navigate('/')}
-              >
-                Return to Home Page
-              </button>
             </div>
+            <button 
+              className="secondary-button"
+              onClick={() => navigate('/')}
+            >
+              Return to Home Page
+            </button>
           </div>
         </div>
       </div>
-    </LayoutWrapper>
+    </>
   );
 }
 

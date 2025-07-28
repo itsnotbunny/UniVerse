@@ -1,4 +1,4 @@
-/* Improved AuthPages.css - Fixed Scaling and Responsiveness with Background Image */
+/* Clean AuthPages.css - Simple and effective */
 
 /* CSS Custom Properties for consistent scaling */
 :root {
@@ -14,73 +14,103 @@
   --button-padding: clamp(0.6rem, 2vw, 0.75rem) clamp(1rem, 3vw, 1.2rem);
 }
 
-/* Outer container that fills the screen and centers the tile */
-.fullscreen-center {
-  min-height: 100vh;
-  width: 100%;
-  background-image: url('./assets/UniVerseLogo.jpg'); /* Replace with your background image path */
+/* Simple fullscreen background container */
+.auth-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('../assets/UniVerseLogo.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: var(--auth-padding);
-  box-sizing: border-box;
-  overflow-x: hidden;
-  position: relative;
+  z-index: -1;
 }
 
-/* Add a subtle overlay to ensure text readability */
-.fullscreen-center::before {
+.auth-background::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
 }
 
-/* The actual tile box for login/register */
-.auth-page, 
-.register-page {
+/* Main container for auth pages */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  position: relative;
+  z-index: 2;
+  width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Page title positioning */
+.auth-page-title {
+  color: white;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 3;
+}
+
+/* Auth form card */
+.auth-card {
   background-color: rgba(17, 17, 17, 0.95);
   backdrop-filter: blur(10px);
-  padding: var(--auth-padding);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
   border-radius: var(--auth-border-radius);
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), 0 8px 32px rgba(0, 0, 0, 0.5);
   max-width: var(--auth-max-width);
   width: 100%;
+  max-height: 70vh;
   color: white;
   text-align: center;
   box-sizing: border-box;
-  min-height: fit-content;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+  margin: 0 auto; /* Center the card horizontally */
+  margin-top: 4rem; /* Space for the title above */
 }
 
-/* Titles */
-.auth-page h2, 
-.register-page h2 {
+/* Form titles */
+.auth-card h2 {
   color: gold;
-  margin-bottom: var(--gap-lg);
+  margin-bottom: var(--gap-base);
   font-size: var(--font-size-lg);
   font-weight: 600;
   line-height: 1.3;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Google + buttons layout */
+/* Form layout */
 .auth-form, 
 .google-button {
   display: flex;
   flex-direction: column;
   gap: var(--gap-base);
-  margin-top: var(--gap-lg);
+  margin-top: var(--gap-base);
 }
 
 /* Enhanced button styling */
@@ -96,7 +126,7 @@ button {
   transition: all 0.2s ease;
   width: 100%;
   box-sizing: border-box;
-  min-height: 44px; /* Minimum touch target size */
+  min-height: 44px;
   box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
 }
 
@@ -110,7 +140,7 @@ button:active {
   transform: translateY(0);
 }
 
-/* Secondary button style for "Return to Home" */
+/* Secondary button style */
 .secondary-button {
   background-color: rgba(255, 255, 255, 0.1) !important;
   color: white !important;
@@ -136,7 +166,7 @@ select {
   font-size: var(--font-size-sm);
   width: 100%;
   box-sizing: border-box;
-  min-height: 44px; /* Minimum touch target size */
+  min-height: 44px;
   backdrop-filter: blur(5px);
 }
 
@@ -183,17 +213,6 @@ label {
   backdrop-filter: blur(5px);
 }
 
-/* Wrapper that centers login/register tile */
-.auth-center-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - var(--auth-padding) * 2);
-  position: relative;
-  z-index: 1;
-}
-
 /* Google button improvements */
 .google-button > div {
   display: flex !important;
@@ -214,25 +233,10 @@ label {
   align-items: center;
   margin: var(--gap-sm) auto !important;
   width: 100%;
-  min-height: 44px; /* Ensure minimum touch target */
+  min-height: 44px;
 }
 
-/* Register page specific adjustments */
-.register-page {
-  /* Remove the transform that was causing issues */
-  transform: none;
-}
-
-.register-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-}
-
-/* Input field styling (if any are added later) */
+/* Input field styling */
 input[type="text"],
 input[type="email"],
 input[type="password"] {
@@ -257,146 +261,77 @@ input[type="password"]:focus {
   box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
 }
 
-/* Responsive Design */
+/* Mobile Responsive Design */
 @media (max-width: 480px) {
-  :root {
-    --auth-padding: 1rem;
-    --auth-max-width: calc(100vw - 2rem);
-  }
-  
-  .fullscreen-center {
+  .auth-container {
     padding: 1rem;
-    background-attachment: scroll; /* Better performance on mobile */
   }
   
-  .auth-page, 
-  .register-page {
+  .auth-card {
     padding: 1.5rem;
-    min-width: 0; /* Allow shrinking */
+    max-height: calc(100vh - 6rem);
+    width: calc(100vw - 2rem);
+    max-width: none;
+    margin-top: 5rem;
   }
   
-  .auth-page h2, 
-  .register-page h2 {
-    margin-bottom: 1.5rem;
+  .auth-page-title {
+    font-size: 1.5rem;
+    top: 1rem;
+  }
+  
+  .auth-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
   }
   
   .auth-form,
   .google-button {
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-  
-  button {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-  }
-  
-  select {
-    padding: 0.75rem;
-    font-size: 1rem;
+    gap: 0.75rem;
+    margin-top: 1rem;
   }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
-  .auth-page, 
-  .register-page {
+  .auth-card {
     max-width: 450px;
-    padding: 2rem;
+    max-height: 85vh;
   }
 }
 
 @media (min-width: 769px) {
-  .auth-page, 
-  .register-page {
+  .auth-card {
     max-width: 400px;
+    max-height: 80vh;
   }
 }
 
-/* Landscape orientation on mobile */
+/* Landscape orientation */
 @media (max-height: 600px) and (orientation: landscape) {
-  .fullscreen-center {
+  .auth-container {
+    padding: 0.5rem;
+  }
+  
+  .auth-card {
+    max-height: calc(100vh - 4rem);
     padding: 1rem;
-    align-items: flex-start;
-    padding-top: 2rem;
-    background-attachment: scroll;
+    margin-top: 3rem;
   }
   
-  .auth-page, 
-  .register-page {
-    margin: 0;
-  }
-}
-
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  .auth-page, 
-  .register-page {
-    background-color: #000;
-    border: 2px solid #fff;
+  .auth-page-title {
+    font-size: 1.2rem;
+    top: 0.5rem;
   }
   
-  .auth-page h2, 
-  .register-page h2,
-  label {
-    color: #fff;
+  .auth-card h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
   }
   
-  button {
-    background-color: #fff;
-    color: #000;
-    border: 2px solid #000;
-  }
-  
-  select,
-  input[type="text"],
-  input[type="email"],
-  input[type="password"] {
-    background-color: #000;
-    border-color: #fff;
-    color: #fff;
-  }
-}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  button {
-    transition: none;
-  }
-  
-  button:hover {
-    transform: none;
-  }
-  
-  button:active {
-    transform: none;
-  }
-}
-
-/* Print styles */
-@media print {
-  .fullscreen-center {
-    background-color: white;
-    background-image: none;
-    padding: 0;
-  }
-  
-  .auth-page, 
-  .register-page {
-    background-color: white;
-    color: black;
-    box-shadow: none;
-    border: 1px solid black;
-  }
-  
-  .auth-page h2, 
-  .register-page h2 {
-    color: black;
-  }
-  
-  button {
-    background-color: white;
-    color: black;
-    border: 1px solid black;
+  .auth-form,
+  .google-button {
+    gap: 0.5rem;
+    margin-top: 0.5rem;
   }
 }
 

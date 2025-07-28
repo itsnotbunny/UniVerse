@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import LayoutWrapper from '../components/LayoutWrapper';
-import './AuthPages.css'; // Changed from RegisterPage.css to AuthPages.css
+import './AuthPages.css';
 
 function RegisterPage() {
   const [role, setRole] = useState('');
@@ -37,43 +36,43 @@ function RegisterPage() {
   };
 
   return (
-    <LayoutWrapper title="Register" center>
-      <div className="fullscreen-center">
-        <div className="auth-center-wrapper">
-          <div className="register-wrapper">
-            <div className="auth-page register-page">
-              <h2>Register with Google</h2>
+    <>
+      <div className="auth-background"></div>
+      <div className="auth-page-title">Welcome to UniVerse</div>
+      <div className="auth-container">
+        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div className="auth-card">
+            <h2>Register with Google</h2>
 
-              <label>Select your role:</label>
-              <select value={role} onChange={(e) => setRole(e.target.value)}>
-                <option value="">-- Select Role --</option>
-                <option value="faculty">Faculty</option>
-                <option value="studentCoordinator">Student Coordinator</option>
-              </select>
+            <label>Select your role:</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="">-- Select Role --</option>
+              <option value="faculty">Faculty</option>
+              <option value="studentCoordinator">Student Coordinator</option>
+            </select>
 
-              {role && (
-                <div className="google-btn-wrapper">
-                  <GoogleLogin
-                    onSuccess={handleGoogleRegister}
-                    onError={() => setError("Google sign-in failed")}
-                    />
-                </div>
-              )}
+            {role && (
+              <div className="google-btn-wrapper">
+                <GoogleLogin
+                  onSuccess={handleGoogleRegister}
+                  onError={() => setError("Google sign-in failed")}
+                  />
+              </div>
+            )}
 
-              {error && <p className="error">{error}</p>}
-              {message && <p className="success">{message}</p>}
+            {error && <p className="error">{error}</p>}
+            {message && <p className="success">{message}</p>}
 
-              <button 
-                className="secondary-button"
-                onClick={() => navigate('/')}
-              >
-                Back to Login
-              </button>
-            </div>
+            <button 
+              className="secondary-button"
+              onClick={() => navigate('/')}
+            >
+              Back to Login
+            </button>
           </div>
         </div>
       </div>
-    </LayoutWrapper>
+    </>
   );
 }
 
