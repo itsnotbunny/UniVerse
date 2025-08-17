@@ -293,46 +293,42 @@ function CoordinatorDashboard() {
             <div className="form-card">
               <h3>Club Showcase Uploader</h3>
               <form onSubmit={handleShowcaseSubmit} className="showcase-form">
-                <div className="form-row">
-                  <input
-                    type="text"
-                    value={showcase.club}
-                    onChange={(e) => setShowcase({ ...showcase, club: e.target.value })}
-                    placeholder="Club Name"
-                    className="form-input"
-                    required
-                  />
-                  <input
-                    type="text"
-                    value={showcase.title}
-                    onChange={(e) => setShowcase({ ...showcase, title: e.target.value })}
-                    placeholder="Event/Showcase Title"
-                    className="form-input"
-                    required
-                  />
-                </div>
-                <div className="form-row">
-                  <input
-                    type="url"
-                    value={showcase.imageUrl}
-                    onChange={(e) => setShowcase({ ...showcase, imageUrl: e.target.value })}
-                    placeholder="Image URL"
-                    className="form-input"
-                  />
-                  <input
-                    type="url"
-                    value={showcase.linkUrl}
-                    onChange={(e) => setShowcase({ ...showcase, linkUrl: e.target.value })}
-                    placeholder="Registration/Event Link"
-                    className="form-input"
-                  />
-                </div>
-                <textarea
+                <input
+                  type="text"
+                  value={showcase.club}
+                  onChange={(e) => setShowcase({ ...showcase, club: e.target.value })}
+                  placeholder="Club Name"
+                  className="form-input"
+                  required
+                />
+                <input
+                  type="text"
+                  value={showcase.title}
+                  onChange={(e) => setShowcase({ ...showcase, title: e.target.value })}
+                  placeholder="Event/Showcase Title"
+                  className="form-input"
+                  required
+                />
+                <input
+                  type="url"
+                  value={showcase.imageUrl}
+                  onChange={(e) => setShowcase({ ...showcase, imageUrl: e.target.value })}
+                  placeholder="Image URL"
+                  className="form-input"
+                />
+                <input
+                  type="url"
+                  value={showcase.linkUrl}
+                  onChange={(e) => setShowcase({ ...showcase, linkUrl: e.target.value })}
+                  placeholder="Registration/Event Link"
+                  className="form-input"
+                />
+                <input
+                  type="text"
                   value={showcase.description}
                   onChange={(e) => setShowcase({ ...showcase, description: e.target.value })}
-                  placeholder="Describe your club showcase, event details, what makes it special..."
-                  className="form-textarea"
-                  rows="5"
+                  placeholder="Describe your club showcase..."
+                  className="form-input"
                   required
                 />
                 <button type="submit" className="btn-primary">Upload Showcase</button>

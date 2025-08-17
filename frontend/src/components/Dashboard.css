@@ -446,6 +446,17 @@
   font-size: var(--font-size-lg);
 }
 
+.form-input {
+  width: 97.67%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #2d2d2d;
+}
+
+
 /* Responsive Design - Mobile First Approach */
 @media (max-width: 480px) {
   .dashboard-container {
