@@ -1,3 +1,5 @@
+// frontend/src/pages/CoordinatorDashboard.jsx
+
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import LayoutWrapper from '../components/LayoutWrapper';
@@ -10,7 +12,6 @@ function CoordinatorDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [activeTab, setActiveTab] = useState('events');
-
   const [showcase, setShowcase] = useState({
     club: '',
     title: '',
@@ -18,7 +19,6 @@ function CoordinatorDashboard() {
     imageUrl: '',
     linkUrl: ''
   });
-
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
@@ -45,7 +45,6 @@ function CoordinatorDashboard() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
@@ -55,8 +54,8 @@ function CoordinatorDashboard() {
         axios.get(`${API}/api/events/sent`, { headers }),
         axios.get(`${API}/api/faculty/list`, { headers }),
       ]);
-      setEvents(Array.isArray(eventRes.data) ? eventRes.data : []);
-      setFaculty(Array.isArray(facultyRes.data) ? facultyRes.data : []);
+      setEvents(eventRes.data);
+      setFaculty(facultyRes.data);
     } catch (err) {
       console.error('❌ Fetch error:', err);
     } finally {
@@ -103,17 +102,18 @@ function CoordinatorDashboard() {
     }
   };
 
+  // ✅ Merged FIX from your second file: send ISO date + explicit JSON header + clearer errors
   const handleEventSubmit = async (e) => {
     e.preventDefault();
     try {
       const payload = {
-        title: newEvent.title.trim(),
-        description: newEvent.description.trim(),
-        eventDate: new Date(newEvent.eventDate).toISOString(),
-        registrationLinks: [] // keep API stable
+        title: newEvent.title,
+        description: newEvent.description,
+        eventDate: newEvent.eventDate ? new Date(newEvent.eventDate).toISOString() : null,
+        registrationLinks: []
       };
 
-      console.log("📤 Sending event:", payload);
+      console.log('📤 Sending event:', payload);
 
       await axios.post(`${API}/api/events`, payload, {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -142,159 +142,84 @@ function CoordinatorDashboard() {
     }
   };
 
-  // ---------- Render helpers ----------
-  const renderEventsList = () => {
-    if (!events.length) return <p className="empty-state">No events yet. Submit one 👇</p>;
-    return (
-      <div className="cards-grid">
-        {events.map(ev => (
-          <div className="card" key={ev._id}>
-            <h4>{ev.title}</h4>
-            <p>{ev.description}</p>
-            <p><strong>Date:</strong> {new Date(ev.eventDate).toLocaleDateString()}</p>
-            <p><strong>Status:</strong> {ev.status}</p>
-            <button className="btn-secondary" onClick={() => openModal(ev)}>View / Edit Flow</button>
-          </div>
-        ))}
+  // --- Tile/Card renderers (kept to preserve your original layout) ---
+  const renderEventCard = (event) => (
+    <div key={event._id} className="dashboard-card" onClick={() => openModal(event)}>
+      <div className="card-header">
+        <h3>{event.title}</h3>
+        <span className="club-name">{event.clubName}</span>
       </div>
-    );
-  };
-
-  const renderStatus = () => {
-    const counts = events.reduce((acc, e) => {
-      acc[e.status] = (acc[e.status] || 0) + 1;
-      return acc;
-    }, {});
-
-    const statusOrder = ['Pending', 'Partially Approved', 'Approved', 'Rejected'];
-
-    return (
-      <div className="cards-grid">
-        {statusOrder.map(s => (
-          <div className="card" key={s}>
-            <h4>{s}</h4>
-            <p>{counts[s] || 0} event(s)</p>
-          </div>
-        ))}
+      <div className="card-content">
+        <p className="event-date">
+          📅 {(() => {
+            const d = event.eventDate || event.date; // support both shapes
+            return d ? new Date(d).toLocaleDateString() : '—';
+          })()}
+        </p>
+        <p className="event-description">{event.description?.substring(0, 100)}...</p>
       </div>
-    );
-  };
-
-  const renderFacultyStatus = () => {
-    if (!events.length) return <p className="empty-state">No events to show.</p>;
-    return (
-      <div className="stack">
-        {events.map(ev => (
-          <div className="card" key={ev._id}>
-            <h4>{ev.title}</h4>
-            <ul className="list">
-              {(ev.facultyApprovals || []).map((appr, i) => (
-                <li key={i}>
-                  <strong>{appr?.faculty?.name || 'Faculty'}</strong>:&nbsp;
-                  {appr.approved === true ? '✅ Approved'
-                    : appr.approved === false ? '❌ Rejected'
-                    : '⏳ Pending'}
-                  {appr.comment ? ` — ${appr.comment}` : ''}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <div className="card-footer">
+        <span className="event-status">Status: {event.status}</span>
       </div>
-    );
-  };
-
-  const renderFacultyList = () => {
-    if (!faculty.length) return <p className="empty-state">No faculty found.</p>;
-    return (
-      <div className="cards-grid">
-        {faculty.map(f => (
-          <div className="card" key={f._id}>
-            <h4>{f.name}</h4>
-            <p>{f.email}</p>
-            {f.facultyRole && <p><em>{f.facultyRole}</em></p>}
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderIdeas = () => (
-    <div className="form-card">
-      <h3>Submit an Idea</h3>
-      <form onSubmit={handleIdeaSubmit}>
-        <textarea
-          value={ideaText}
-          onChange={(e) => setIdeaText(e.target.value)}
-          placeholder="Your idea..."
-          rows="4"
-          className="form-input"
-          required
-        />
-        <button type="submit" className="btn-primary">💡 Submit Idea</button>
-      </form>
     </div>
   );
 
-  const renderOrganisation = () => {
-    if (!events.length) return <p className="empty-state">No events yet.</p>;
+  const renderStatusCard = (event) => {
+    const approved = event.facultyApprovals.filter(a => a.approved === true).length;
+    const rejected = event.facultyApprovals.filter(a => a.approved === false).length;
+    const pending = event.facultyApprovals.filter(a => a.approved === null).length;
+
     return (
-      <div className="cards-grid">
-        {events.map(ev => (
-          <div className="card" key={ev._id}>
-            <h4>{ev.title}</h4>
-            <p>{ev.organisingFlow ? ev.organisingFlow.slice(0, 120) + '…' : 'No flow yet.'}</p>
-            <button className="btn-secondary" onClick={() => openModal(ev)}>✏️ Edit Flow</button>
+      <div key={event._id} className="dashboard-card" onClick={() => openModal(event)}>
+        <div className="card-header">
+          <h3>{event.title}</h3>
+          <span className="club-name">{event.clubName}</span>
+        </div>
+        <div className="card-content">
+          <p className="event-status">Status: <strong>{event.status}</strong></p>
+          <div className="approval-stats">
+            <span className="approved">✅ {approved}</span>
+            <span className="rejected">❌ {rejected}</span>
+            <span className="pending">⏳ {pending}</span>
           </div>
-        ))}
+        </div>
       </div>
     );
   };
 
-  const renderShowcase = () => (
-    <div className="form-card">
-      <h3>Club Showcase</h3>
-      <form onSubmit={handleShowcaseSubmit} className="stack">
-        <input className="form-input" placeholder="Club" value={showcase.club} onChange={e => setShowcase({ ...showcase, club: e.target.value })} required />
-        <input className="form-input" placeholder="Title" value={showcase.title} onChange={e => setShowcase({ ...showcase, title: e.target.value })} required />
-        <textarea className="form-input" placeholder="Description" rows="4" value={showcase.description} onChange={e => setShowcase({ ...showcase, description: e.target.value })} required />
-        <input className="form-input" placeholder="Image URL" value={showcase.imageUrl} onChange={e => setShowcase({ ...showcase, imageUrl: e.target.value })} />
-        <input className="form-input" placeholder="Link URL" value={showcase.linkUrl} onChange={e => setShowcase({ ...showcase, linkUrl: e.target.value })} />
-        <button type="submit" className="btn-primary">🎯 Publish Showcase</button>
-      </form>
+  const renderFacultyStatusCard = (event) => (
+    <div key={event._id} className="dashboard-card">
+      <div className="card-header">
+        <h3>{event.title}</h3>
+        <span className="club-name">{event.clubName}</span>
+      </div>
+      <div className="card-content">
+        <div className="faculty-approvals">
+          {event.facultyApprovals.map((fa, i) => (
+            <div key={i} className="approval-item">
+              <span>Faculty ID: {fa.faculty}</span>
+              <span className={`status ${fa.read ? 'read' : 'unread'}`}>
+                {fa.read ? '🟢 Seen' : '⚫ Not Seen'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 
-  const renderNewEvent = () => (
-    <div className="form-container">
-      <div className="form-card">
-        <h3>Send New Event for Approval</h3>
-        <form onSubmit={handleEventSubmit} className="event-form">
-          <input
-            type="text"
-            value={newEvent.title}
-            onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-            placeholder="Event Title"
-            className="form-input"
-            required
-          />
-          <textarea
-            value={newEvent.description}
-            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-            placeholder="Event Description"
-            className="form-input"
-            rows="4"
-            required
-          />
-          <input
-            type="date"
-            value={newEvent.eventDate}
-            onChange={(e) => setNewEvent({ ...newEvent, eventDate: e.target.value })}
-            className="form-input"
-            required
-          />
-          <button type="submit" className="btn-primary">🚀 Submit for Approval</button>
-        </form>
+  const renderFacultyCard = (facultyMember) => (
+    <div key={facultyMember._id} className="dashboard-card">
+      <div className="card-header">
+        <h3>{facultyMember.name}</h3>
+        <span className="faculty-role">{facultyMember.facultyRole}</span>
+      </div>
+      <div className="card-content">
+        <div className="online-status">
+          <span className={`status ${facultyMember.isOnline ? 'online' : 'offline'}`}>
+            {facultyMember.isOnline ? '🟢 Online' : '⚫ Offline'}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -310,15 +235,186 @@ function CoordinatorDashboard() {
     }
 
     switch (activeTab) {
-      case 'events': return renderEventsList();
-      case 'status': return renderStatus();
-      case 'faculty-status': return renderFacultyStatus();
-      case 'faculty-list': return renderFacultyList();
-      case 'ideas': return renderIdeas();
-      case 'organisation': return renderOrganisation();
-      case 'showcase': return renderShowcase();
-      case 'new-event': return renderNewEvent();
-      default: return <p className="empty-state">Select a tab to view content</p>;
+      case 'events':
+        return (
+          <div className="cards-grid">
+            {events.length > 0
+              ? events.map(renderEventCard)
+              : <p className="empty-state">No events sent</p>}
+          </div>
+        );
+
+      case 'status':
+        return (
+          <div className="cards-grid">
+            {events.length > 0
+              ? events.map(renderStatusCard)
+              : <p className="empty-state">No events to show status</p>}
+          </div>
+        );
+
+      case 'faculty-status':
+        return (
+          <div className="cards-grid">
+            {events.length > 0
+              ? events.map(renderFacultyStatusCard)
+              : <p className="empty-state">No faculty status to display</p>}
+          </div>
+        );
+
+      case 'faculty-list':
+        return (
+          <div className="cards-grid">
+            {faculty.length > 0
+              ? faculty.map(renderFacultyCard)
+              : <p className="empty-state">No faculty members found</p>}
+          </div>
+        );
+
+      case 'ideas':
+        return (
+          <div className="form-container">
+            <div className="form-card">
+              <h3>Share Your Ideas</h3>
+              <form onSubmit={handleIdeaSubmit}>
+                <textarea
+                  value={ideaText}
+                  onChange={(e) => setIdeaText(e.target.value)}
+                  placeholder="Share your ideas for events, improvements, or suggestions..."
+                  className="form-input"
+                  rows="6"
+                  required
+                />
+                <button type="submit" className="btn-primary">Submit Idea</button>
+              </form>
+            </div>
+          </div>
+        );
+
+      case 'organisation':
+        return (
+          <div className="form-container">
+            <div className="form-card">
+              <h3>Event Organisation</h3>
+              {selectedEvent ? (
+                <form onSubmit={handleOrgSubmit}>
+                  <div className="selected-event-info">
+                    <h4>Editing: {selectedEvent.title}</h4>
+                    <p>{selectedEvent.clubName}</p>
+                  </div>
+                  <textarea
+                    value={orgText}
+                    onChange={(e) => setOrgText(e.target.value)}
+                    placeholder="Describe the event organization flow, timeline, responsibilities..."
+                    className="form-textarea"
+                    rows="8"
+                    required
+                  />
+                  <div className="form-actions">
+                    <button type="submit" className="btn-primary">Save Flow</button>
+                    <button 
+                      type="button" 
+                      onClick={() => setSelectedEvent(null)}
+                      className="btn-secondary"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <p className="instruction-text">Click on an event from the "Events Sent" tab to edit its organizing flow</p>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'showcase':
+        return (
+          <div className="form-container">
+            <div className="form-card">
+              <h3>Club Showcase Uploader</h3>
+              <form onSubmit={handleShowcaseSubmit} className="showcase-form">
+                <input
+                  type="text"
+                  value={showcase.club}
+                  onChange={(e) => setShowcase({ ...showcase, club: e.target.value })}
+                  placeholder="Club Name"
+                  className="form-input"
+                  required
+                />
+                <input
+                  type="text"
+                  value={showcase.title}
+                  onChange={(e) => setShowcase({ ...showcase, title: e.target.value })}
+                  placeholder="Event/Showcase Title"
+                  className="form-input"
+                  required
+                />
+                <input
+                  type="url"
+                  value={showcase.imageUrl}
+                  onChange={(e) => setShowcase({ ...showcase, imageUrl: e.target.value })}
+                  placeholder="Image URL"
+                  className="form-input"
+                />
+                <input
+                  type="url"
+                  value={showcase.linkUrl}
+                  onChange={(e) => setShowcase({ ...showcase, linkUrl: e.target.value })}
+                  placeholder="Registration/Event Link"
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  value={showcase.description}
+                  onChange={(e) => setShowcase({ ...showcase, description: e.target.value })}
+                  placeholder="Describe your club showcase..."
+                  className="form-input"
+                  required
+                />
+                <button type="submit" className="btn-primary">Upload Showcase</button>
+              </form>
+            </div>
+          </div>
+        );
+
+      case 'new-event':
+        return (
+          <div className="form-container">
+            <div className="form-card">
+              <h3>Send New Event for Approval</h3>
+              <form onSubmit={handleEventSubmit} className="event-form">
+                <input
+                  type="text"
+                  value={newEvent.title}
+                  onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                  placeholder="Event Title"
+                  className="form-input"
+                  required
+                />
+                <textarea
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                  placeholder="Event Description"
+                  className="form-input"
+                  rows="4"
+                  required
+                />
+                <input
+                  type="date"
+                  value={newEvent.eventDate}
+                  onChange={(e) => setNewEvent({ ...newEvent, eventDate: e.target.value })}
+                  className="form-input"
+                  required
+                />
+                <button type="submit" className="btn-primary">🚀 Submit for Approval</button>
+              </form>
+            </div>
+          </div>
+        );
+
+      default:
+        return <p className="empty-state">Select a tab to view content</p>;
     }
   };
 
@@ -367,39 +463,28 @@ function CoordinatorDashboard() {
             <h2>{selectedEvent.title}</h2>
             <p className="modal-description">{selectedEvent.description}</p>
             <div className="modal-divider"></div>
-
             <div className="faculty-feedback-section">
               <h3>Faculty Feedback:</h3>
               <div className="feedback-list">
                 {(selectedEvent.facultyApprovals || []).map((f, i) => (
                   <div key={i} className="feedback-item">
                     <div className="feedback-header">
-                      <strong>{f?.faculty?.name || 'Faculty'}</strong>
+                      <strong>Faculty ID: {f.faculty}</strong>
                     </div>
                     <div className="feedback-details">
                       <p><strong>Status:</strong> {
                         f.approved === true ? '✅ Approved' :
-                        f.approved === false ? '❌ Rejected' : '⏳ Pending'
+                        f.approved === false ? '❌ Rejected' :
+                        '⏳ Pending'
                       }</p>
-                      {f.comment && <p><strong>Comment:</strong> {f.comment}</p>}
+                      {f.comment && (
+                        <p><strong>Comment:</strong> {f.comment}</p>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="modal-divider"></div>
-
-            <form onSubmit={handleOrgSubmit} className="stack">
-              <textarea
-                value={orgText}
-                onChange={(e) => setOrgText(e.target.value)}
-                placeholder="Organising flow / next steps"
-                rows={5}
-                className="form-input"
-              />
-              <button className="btn-primary" type="submit">💾 Save Flow</button>
-            </form>
           </div>
         )}
       </Modal>
