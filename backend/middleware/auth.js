@@ -2,16 +2,16 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Your existing middleware functions
+// ✅ Auth check
 const authMiddleware = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
-
   if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
+
     req.user = user;
     next();
   } catch (err) {
@@ -19,26 +19,25 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-const isAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') return res.status(403).send('Access denied');
-  next();
+// ✅ Flexible role checker
+const requireRole = (roles) => {
+  const allowed = Array.isArray(roles) ? roles : [roles];
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ message: 'Unauthorized: No user in request' });
+    if (!allowed.includes(req.user.role)) {
+      return res.status(403).json({ message: `Access denied. Requires role: ${allowed.join(', ')}` });
+    }
+    next();
+  };
 };
 
-const isFaculty = (req, res, next) => {
-  if (req.user.role !== 'faculty') return res.status(403).send('Access denied');
-  next();
-};
+// ✅ Shortcuts (for convenience)
+const isAdmin = requireRole('admin');
+const isFaculty = requireRole('faculty');
+const isCoordinator = requireRole('studentCoordinator');
+const isStudent = requireRole('student');
 
-const isCoordinator = (req, res, next) => {
-  if (req.user.role !== 'studentCoordinator') return res.status(403).send('Access denied');
-  next();
-};
-
-const isStudent = (req, res, next) => {
-  if (req.user.role !== 'student') return res.status(403).send('Access denied');
-  next();
-};
-
+// ✅ Pending check
 const checkPending = (req, res, next) => {
   if (req.user.role === 'pending') {
     return res.status(403).send('Your registration is still pending approval.');
@@ -46,21 +45,12 @@ const checkPending = (req, res, next) => {
   next();
 };
 
-exports.requireRole = (role) => {
-  return (req, res, next) => {
-    if (!req.user || req.user.role !== role) {
-      return res.status(403).json({ message: 'Forbidden: insufficient role' });
-    }
-    next();
-  };
-};
-
-// ✅ Export all middleware
 module.exports = {
   authMiddleware,
+  requireRole,
   isAdmin,
   isFaculty,
   isCoordinator,
   isStudent,
-  checkPending,
+  checkPending
 };
